@@ -271,7 +271,7 @@ local function Finish (ReturnSpellOnly, StealthSpell)
       if ReturnSpellOnly then
         return S.Rupture
       else
-        if S.Rupture:IsReady() and Cast(S.Rupture) then return "Cast Rupture" end
+        if S.Rupture:IsReady() and Cast(S.Rupture) then return "Cast Rupture Not Up" end
         SetPoolingFinisher(S.Rupture)
       end
     end
@@ -295,7 +295,7 @@ local function Finish (ReturnSpellOnly, StealthSpell)
     if ReturnSpellOnly then
       return S.Rupture
     else
-      if S.Rupture:IsReady() and Cast(S.Rupture) then return "Cast Rupture" end
+      if S.Rupture:IsReady() and Cast(S.Rupture) then return "Cast Rupture Refresh" end
       SetPoolingFinisher(S.Rupture)
     end
   end
@@ -311,7 +311,9 @@ local function Finish (ReturnSpellOnly, StealthSpell)
   end
 
   -- actions.finish+=/cold_blood,if=variable.secret_condition&cooldown.secret_technique.ready
-  if S.ColdBlood:IsReady() and Secret_Condition(ShadowDanceBuff, PremeditationBuff) and S.SecretTechnique:IsReady() then
+  -- Seny Only Add cold blood to sec tech when shadow blades is either up or isn't in range to be pulled by vanish for double dance windows where we want to CB on the 2nd cast
+  if S.ColdBlood:IsReady() and Secret_Condition(ShadowDanceBuff, PremeditationBuff) and S.SecretTechnique:IsReady() and
+    (S.ShadowBlades:CooldownRemains() >= 30 or Player:BuffUp(S.ShadowBlades)) then
     if Settings.Commons.OffGCDasOffGCD.ColdBlood then
       Cast(S.ColdBlood, Settings.Commons.OffGCDasOffGCD.ColdBlood)
     else
@@ -536,8 +538,36 @@ local function StealthMacro (StealthSpell, EnergyThreshold)
   return false
 end
 
+local function SmolderonCDs()
+  -- Short DPS windows so we want to vanish within 5 seconds of the first secret Technique to pull shadow blades and fit a 2nd secret technique cast into the window.
+  -- Double Dance on the pull so the 2nd sec technique in the intermission naturally aligns with CB
+  if S.Vanish:IsReady() then
+    if S.SecretTechnique:TimeSinceLastCast() < 5 and (Player:BuffUp(S.Flagellation) or Player:BuffUp(S.FlagellationPersistBuff))
+      and (S.ShadowBlades:CooldownRemains() <= 30 or S.ShadowBlades:CooldownRemains() >= 90) then
+      ShouldReturn = StealthMacro(S.Vanish, StealthEnergyRequired)
+      if ShouldReturn then return "Vanish Macro Custom Smolderon " .. ShouldReturn end
+    end
+  end
+
+  -- After vanishing redance as soon as subterfuge ends
+  if S.ShadowDance:IsReady() then
+    if S.Vanish:TimeSinceLastCast() < 8 and not Player:StealthUp(true, true) then
+      print("checking Smolderon Dance")
+      ShouldReturn = StealthMacro(S.ShadowDance, StealthEnergyRequired)
+      if ShouldReturn then return "ShadowDance Macro Custom Smolderon " .. ShouldReturn end
+    end
+  end
+
+end
+
 -- # Cooldowns
 local function CDs ()
+  -- Boss Specific CD profiles
+  if Target:NPCID() == 200927 then
+    ShouldReturn = SmolderonCDs()
+    if ShouldReturn then return ShouldReturn end
+  end
+
   -- actions.cds+=/cold_blood,if=!talent.secret_technique&combo_points>=5
   if HR.CDsON() and S.ColdBlood:IsReady() and not S.SecretTechnique:IsAvailable() and ComboPoints >= 5 then
     if Cast(S.ColdBlood, Settings.Commons.OffGCDasOffGCD.ColdBlood) then return "Cast Cold Blood" end
@@ -572,7 +602,8 @@ local function CDs ()
   if HR.CDsON() and S.SymbolsofDeath:IsReady() then
     if SnD_Condition() and (not Player:BuffUp(S.TheRotten) or not Player:HasTier(30, 2))
       and Player:BuffRemains(S.SymbolsofDeath) <= 3 and (not S.Flagellation:IsAvailable() or S.Flagellation:CooldownRemains() > 10 or Player:BuffRemains(S.ShadowDance) >= 2
-      and S.InvigoratingShadowdust:IsAvailable() or S.Flagellation:IsReady() and EffectiveComboPoints >= 5 and not S.InvigoratingShadowdust:IsAvailable()) then
+      and S.InvigoratingShadowdust:IsAvailable() or S.Flagellation:IsReady() and EffectiveComboPoints >= 5 and not S.InvigoratingShadowdust:IsAvailable())
+      and S.ShadowDance:IsReady() then
         if Cast(S.SymbolsofDeath, Settings.Subtlety.OffGCDasOffGCD.SymbolsofDeath) then return "Cast Symbols of Death" end
     end
   end
@@ -778,7 +809,8 @@ local function Stealth_CDs (EnergyThreshold)
       and (not S.TheFirstDance:IsAvailable() or ComboPointsDeficit >= 4 or Player:BuffUp(S.ShadowBlades))
       and (ShD_Combo_Points() and ShD_Threshold() or (Player:BuffUp(S.ShadowBlades) or Player:BuffUp(S.SymbolsofDeath)
       and not S.Sepsis:IsAvailable() or Player:BuffRemains(S.SymbolsofDeath) >= 4 and not Player:HasTier(30, 2) or not Player:BuffUp(S.SymbolsofDeath) and Player:HasTier(30, 2))
-      and S.SecretTechnique:CooldownRemains() < 10 + 12 * num(not S.InvigoratingShadowdust:IsAvailable() or Player:HasTier(30, 2))) then
+      and S.SecretTechnique:CooldownRemains() < 10 + 12 * num(not S.InvigoratingShadowdust:IsAvailable() or Player:HasTier(30, 2)))
+      and (S.SymbolsofDeath:IsReady() or Player:BuffUp(S.SymbolsofDeath)) then
       ShouldReturn = StealthMacro(S.ShadowDance, EnergyThreshold)
       if ShouldReturn then return "ShadowDance Macro 1 " .. ShouldReturn end
     end
@@ -921,7 +953,7 @@ local function APL ()
 
     -- # Apply Slice and Dice at 4+ CP if it expires within the next GCD or is not up
     -- actions+=/slice_and_dice,if=spell_targets.shuriken_storm<cp_max_spend&buff.slice_and_dice.remains<gcd.max&fight_remains>6&combo_points>=4
-    if S.SliceandDice:IsCastable() and MeleeEnemies10yCount < Rogue.CPMaxSpend() and Player:BuffRemains(S.SliceandDice) < Player:GCD()
+    if S.SliceandDice:IsCastable() and MeleeEnemies10yCount < Rogue.CPMaxSpend() and Player:BuffRemains(S.SliceandDice) < 3
       and HL.BossFilteredFightRemains(">", 6) and ComboPoints >= 4 then
         if S.SliceandDice:IsReady() and Cast(S.SliceandDice) then return "Cast Slice and Dice (Low Duration)" end
         SetPoolingFinisher(S.SliceandDice)
