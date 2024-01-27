@@ -176,16 +176,29 @@ local function SuggestCycleDoT(DoTSpell, DoTEvaluation, DoTMinTTD, Enemies)
 end
 
 function findClosestTimes(timings, currentTime)
+  local closestPastTime = findClosestPastTime(timings, currentTime)
+  local closestFutureTime = findClosestFutureTime(timings, currentTime)
+  return closestPastTime, closestFutureTime
+end
+
+function findClosestPastTime(timings, currentTime)
   local closestPastTime = nil
-  local closestFutureTime = nil
   for _, time in ipairs(timings) do
     if time <= currentTime and (closestPastTime == nil or time > closestPastTime) then
       closestPastTime = time
-    elseif time > currentTime and (closestFutureTime == nil or time < closestFutureTime) then
+    end
+  end
+  return closestPastTime
+end
+
+function findClosestFutureTime(timings, currentTime)
+  local closestFutureTime = nil
+  for _, time in ipairs(timings) do
+    if time > currentTime and (closestFutureTime == nil or time < closestFutureTime) then
       closestFutureTime = time
     end
   end
-  return closestPastTime, closestFutureTime
+  return closestFutureTime
 end
 
 -- APL Action Lists (and Variables)
@@ -606,7 +619,7 @@ local function SmolderonCDs()
   -- After vanishing redance as soon as subterfuge ends
   -- Allow dance if not within 30 seconds of WorldInFlames
   if S.ShadowDance:IsReady() then
-    if (S.Vanish:TimeSinceLastCast() < 8 or canDance) and not Player:StealthUp(true, true) and S.SymbolsofDeath:IsReady() then
+    if (S.Vanish:TimeSinceLastCast() < 8 or canDance) and S.SymbolsofDeath:IsReady() then
       ShouldReturn = StealthMacro(S.ShadowDance, StealthEnergyRequired)
       if ShouldReturn then return "ShadowDance Macro Custom Smolderon " .. ShouldReturn end
     end
@@ -700,12 +713,169 @@ local function SmolderonCDs()
   return false
 end
 
+-- # Cooldown Usage for Tindral
+local function TindralCDs()
+  local roots = {27, 47, 67, 160, 191, 211, 286, 328, 347, 376, 395, 445}
+  local supernova = {0, 127, 262}
+  local incarnOwl = {82, 230}
+  local currentFightTime = HL.CombatTime()
+  local nextsupernova = findClosestFutureTime(supernova, currentFightTime)
+
+  local canFlag = false
+  local timeUntilNextSupernova = nextsupernova - currentFightTime
+  for _, time in ipairs(supernova) do
+    if math.abs(currentFightTime - time) <= 5 or timeUntilNextSupernova >= 60 then
+      canFlag = true
+    end
+  end
+
+  if HR.CDsON() and S.Flagellation:IsAvailable() and S.Flagellation:IsReady() then
+    if canFlag and S.InvigoratingShadowdust:IsAvailable() and EffectiveComboPoints >= 5 then
+      if Cast(S.Flagellation, nil, Settings.Commons.DisplayStyle.Signature) then return "Cast Flagellation Tindral" end
+    end
+  end
+
+  if HR.CDsON() and S.SymbolsofDeath:IsReady()  then
+    if SnD_Condition() and S.ShadowDance:IsReady() and not Player:StealthUp(true, true) then
+      if Cast(S.SymbolsofDeath, Settings.Subtlety.OffGCDasOffGCD.SymbolsofDeath) then return "Cast Symbols of Death Tindral" end
+    end
+  end
+
+  if HR.CDsON() and S.ShadowBlades:IsReady() then
+    if SnD_Condition() and (EffectiveComboPoints <= 1 or Player:HasTier(31, 4))
+      and (Player:BuffUp(S.Flagellation) or Player:BuffUp(S.FlagellationPersistBuff) or not S.Flagellation:IsAvailable()) then
+      if Cast(S.ShadowBlades, Settings.Subtlety.OffGCDasOffGCD.ShadowBlades) then return "Cast Shadow Blades Tindral" end
+    end
+  end
+
+  -- Triple Dance, Double Vanish Profile
+  if S.Vanish:IsReady() then
+    if S.SecretTechnique:TimeSinceLastCast() < 5 and S.Vanish:TimeSinceLastCast() > 8 and (Player:BuffUp(S.Flagellation) or Player:BuffUp(S.FlagellationPersistBuff))
+      and (S.ShadowBlades:CooldownRemains() <= 30 or S.ShadowBlades:CooldownRemains() >= 60) then
+      ShouldReturn = StealthMacro(S.Vanish, StealthEnergyRequired)
+      if ShouldReturn then return "Vanish Macro Custom Tindral " .. ShouldReturn end
+    end
+  end
+
+  -- actions.cds+=/shuriken_tornado,if=variable.snd_condition&buff.symbols_of_death.up&combo_points<=2&!buff.premeditation.up
+  -- &(!talent.flagellation|cooldown.flagellation.remains>20)&spell_targets.shuriken_storm>=3
+  -- Shuriken Tornado with Symbols of Death on 3 and more targets
+  -- Standard APL tornado suggestion (only on roots), Cant know which roots each person is assigned to so suggest it as standard on all roots if its up
+  if HR.CDsON() and S.ShurikenTornado:IsAvailable() and S.ShurikenTornado:IsReady() then
+    if SnD_Condition() and (S.SymbolsofDeath:IsReady() or Player:BuffUp(S.SymbolsofDeath)) and EffectiveComboPoints <= 2 and not Player:BuffUp(S.Premeditation)
+      and (not S.Flagellation:IsAvailable() or S.Flagellation:CooldownRemains() > 20) and MeleeEnemies10yCount >= 3 then
+      if Cast(S.ShurikenTornado, Settings.Subtlety.GCDasOffGCD.ShurikenTornado) then return "Cast Shuriken Tornado" end
+    end
+  end
+
+  -- After vanishing redance as soon as subterfuge ends and symbols is ready or already up
+  if S.ShadowDance:IsReady() then
+    if not Player:StealthUp(true, true) and (S.SymbolsofDeath:IsReady() or (Player:BuffUp(S.SymbolsofDeath) and Player:BuffRemains(S.SymbolsofDeath) >= 8)) then
+      ShouldReturn = StealthMacro(S.ShadowDance, StealthEnergyRequired)
+      if ShouldReturn then return "ShadowDance Macro Custom Tindral " .. ShouldReturn end
+    end
+  end
+
+  -- actions.cds+=/shadow_dance,if=!buff.shadow_dance.up&fight_remains<=8+talent.subterfuge.enabled
+  if HR.CDsON() and S.ShadowDance:IsAvailable() and MayBurnShadowDance() and S.ShadowDance:IsReady() then
+    if not Player:BuffUp(S.ShadowDance) and HL.BossFilteredFightRemains("<=", 8 + 3*num(S.Subterfuge:IsAvailable())) then
+      if Cast(S.ShadowDance) then return "Cast Shadow Dance Tindral" end
+    end
+  end
+
+  -- actions.cds+=/potion,if=buff.bloodlust.react|fight_remains<30|buff.symbols_of_death.up
+  -- &(buff.shadow_blades.up|cooldown.shadow_blades.remains<=10)
+  if Settings.Commons.Enabled.Potions then
+    local PotionSelected = Everyone.PotionSelected()
+    if PotionSelected and PotionSelected:IsReady() and (Player:BloodlustUp() or HL.BossFilteredFightRemains("<", 30) or Player:BuffUp(S.SymbolsofDeath)
+      and (Player:BuffUp(S.ShadowBlades) or S.ShadowBlades:CooldownRemains() <= 10)) then
+      if Cast(PotionSelected, nil, Settings.Commons.DisplayStyle.Potions) then return "Cast Potion Tindral"; end
+    end
+  end
+
+  -- variable,name=racial_sync,value=buff.shadow_blades.up|!talent.shadow_blades&buff.symbols_of_death.up|fight_remains<20
+  local racial_sync = Player:BuffUp(S.ShadowBlades) or not S.ShadowBlades:IsAvailable() and Player:BuffUp(S.SymbolsofDeath) or HL.BossFilteredFightRemains("<", 20)
+
+  -- actions.cds+=/blood_fury,if=variable.racial_sync
+  if S.BloodFury:IsCastable() and racial_sync then
+    if Cast(S.BloodFury, Settings.Commons.OffGCDasOffGCD.Racials) then return "Cast Blood Fury Tindral" end
+  end
+
+  -- actions.cds+=/berserking,if=variable.racial_sync
+  if S.Berserking:IsCastable() and racial_sync then
+    if Cast(S.Berserking, Settings.Commons.OffGCDasOffGCD.Racials) then return "Cast Berserking Tindral" end
+  end
+
+  -- actions.cds+=/fireblood,if=variable.racial_sync
+  if S.Fireblood:IsCastable() and racial_sync then
+    if Cast(S.Fireblood, Settings.Commons.OffGCDasOffGCD.Racials) then return "Cast Fireblood Tindral" end
+  end
+
+  -- actions.cds+=/ancestral_call,if=variable.racial_sync
+  if S.AncestralCall:IsCastable() and racial_sync then
+    if Cast(S.AncestralCall, Settings.Commons.OffGCDasOffGCD.Racials) then return "Cast Ancestral Call Tindral" end
+  end
+
+  -- actions.cds+=/use_item,name=ashes_of_the_embersoul,if=buff.flagellation_buff.up&talent.invigorating_shadowdust
+  -- |buff.shadow_dance.up&!raid_event.adds.up&!equipped.witherbarks_branch
+  -- Sync specific trinkets to Flagellation or Shadow Dance.
+  if Settings.Commons.Enabled.Trinkets then
+    if I.AshesoftheEmbersoul:IsEquippedAndReady() then
+      if Player:BuffUp(S.Flagellation) and (S.InvigoratingShadowdust:IsAvailable() or Player:BuffUp(S.ShadowDance)) and not I.WitherbarksBranch:IsEquippedAndReady() then
+        if Cast(I.AshesoftheEmbersoul, nil, Settings.Commons.DisplayStyle.Trinkets) then return "Ashes of the Embersoul Tindral" end
+      end
+    end
+  end
+
+  -- actions.cds+=/use_item,name=witherbarks_branch,if=buff.flagellation_buff.up&talent.invigorating_shadowdust
+  -- |buff.shadow_blades.up|equipped.bandolier_of_twisted_blades&raid_event.adds.up
+  if Settings.Commons.Enabled.Trinkets then
+    if I.WitherbarksBranch:IsEquippedAndReady() then
+      if Player:BuffUp(S.Flagellation) and (S.InvigoratingShadowdust:IsAvailable() or Player:BuffUp(S.ShadowBlades) or I.BandolierOfTwistedBlades:IsEquippedAndReady()) then
+        if Cast(I.WitherbarksBranch, nil, Settings.Commons.DisplayStyle.Trinkets) then return "Witherbark's Branch Tindral" end
+      end
+    end
+  end
+
+  -- actions.cds+=/use_item,name=mirror_of_fractured_tomorrows,if=buff.shadow_dance.up&(target.time_to_die>=15|equipped.ashes_of_the_embersoul)
+  if Settings.Commons.Enabled.Trinkets then
+    if I.Mirror:IsEquippedAndReady() then
+      if Player:BuffUp(S.ShadowDance) and (Target:TimeToDie() >= 15 or I.AshesoftheEmbersoul:IsEquipped()) then
+        if Cast(I.Mirror, nil, Settings.Commons.DisplayStyle.Trinkets) then return "Mirror Of Fractured Tomorrows Tindral" end
+      end
+    end
+  end
+
+  -- actions.cds+=/use_items,if=!stealthed.all&(!trinket.mirror_of_fractured_tomorrows.cooldown.ready|!equipped.mirror_of_fractured_tomorrows)|fight_remains<10
+  -- Default fallback for usable items: Use outside of Stealth/Shadow Dance.
+  if not Player:StealthUp(true, true) and (
+    (not I.Mirror:IsReady() or not I.Mirror:IsEquipped()) and
+      ((I.WitherbarksBranch:IsEquipped() and not I.WitherbarksBranch:IsReady() and not I.AshesoftheEmbersoul:IsEquipped()) or
+        (I.AshesoftheEmbersoul:IsEquipped() and not I.AshesoftheEmbersoul:IsReady() and not I.WitherbarksBranch:IsEquipped()))
+      or HL.BossFilteredFightRemains("<", 10)) then
+    local TrinketToUse = Player:GetUseableItems(OnUseExcludes)
+    if TrinketToUse then
+      if Cast(TrinketToUse, nil, Settings.Commons.DisplayStyle.Trinkets) then
+        return "Generic use_items for Tindral" .. TrinketToUse:Name()
+      end
+    end
+  end
+
+  return false
+end
+
 -- # Cooldowns
 local function CDs ()
   -- Boss Specific CD profiles
   if Target:NPCID() == 200927 then
-  -- if true then
+  --if true then
     ShouldReturn = SmolderonCDs()
+    return ShouldReturn
+  end
+
+  if Target:NPCID() == 209090 then
+  --if true then
+    ShouldReturn = TindralCDs()
     return ShouldReturn
   end
 
