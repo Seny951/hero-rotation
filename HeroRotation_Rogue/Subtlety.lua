@@ -864,20 +864,34 @@ local function TindralCDs()
   return false
 end
 
+local function FyrakkCDs()
+
+end
+
 -- # Cooldowns
 local function CDs ()
   -- Boss Specific CD profiles
+
+  -- Smolderon
   if Target:NPCID() == 200927 then
   --if true then
     ShouldReturn = SmolderonCDs()
     return ShouldReturn
   end
 
+  -- Tindral
   if Target:NPCID() == 209090 then
   --if true then
     ShouldReturn = TindralCDs()
     return ShouldReturn
   end
+
+  -- Fyrakk
+  --if Target:NPCID() == 204931 then
+  --if true then
+    --ShouldReturn = FyrakkCDs()
+    --return ShouldReturn
+  --end
 
   -- actions.cds+=/cold_blood,if=!talent.secret_technique&combo_points>=5
   if HR.CDsON() and S.ColdBlood:IsReady() and not S.SecretTechnique:IsAvailable() and ComboPoints >= 5 then
@@ -1120,7 +1134,7 @@ local function Stealth_CDs (EnergyThreshold)
       and (ShD_Combo_Points() and ShD_Threshold() or (Player:BuffUp(S.ShadowBlades) or Player:BuffUp(S.SymbolsofDeath)
       and not S.Sepsis:IsAvailable() or Player:BuffRemains(S.SymbolsofDeath) >= 4 and not Player:HasTier(30, 2) or not Player:BuffUp(S.SymbolsofDeath) and Player:HasTier(30, 2))
       and S.SecretTechnique:CooldownRemains() < 10 + 12 * num(not S.InvigoratingShadowdust:IsAvailable() or Player:HasTier(30, 2)))
-      and (S.SymbolsofDeath:IsReady()) then
+      and (S.SymbolsofDeath:IsReady() or Player:BuffUp(S.SymbolsofDeath)) then
       ShouldReturn = StealthMacro(S.ShadowDance, EnergyThreshold)
       if ShouldReturn then return "ShadowDance Macro 1 " .. ShouldReturn end
     end
