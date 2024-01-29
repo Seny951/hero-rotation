@@ -184,7 +184,7 @@ end
 function findClosestPastTime(timings, currentTime)
   local closestPastTime = 0
   for _, time in ipairs(timings) do
-    if time <= currentTime and (closestPastTime == 0 or time > closestPastTime) then
+    if time <= currentTime and time >= closestPastTime then
       closestPastTime = time
     end
   end
@@ -192,9 +192,9 @@ function findClosestPastTime(timings, currentTime)
 end
 
 function findClosestFutureTime(timings, currentTime)
-  local closestFutureTime = 0
+  local closestFutureTime = currentTime
   for _, time in ipairs(timings) do
-    if time > currentTime and (closestFutureTime == 0 or time < closestFutureTime) then
+    if time >= currentTime and time <= closestFutureTime then
       closestFutureTime = time
     end
   end
@@ -573,7 +573,7 @@ local function SmolderonCDs()
   local canFlag = false
   if closestPastTime and closestFutureTime then
     local timeUntilNextTiming = closestFutureTime - currentFightTime
-    if currentFightTime > closestPastTime and timeUntilNextTiming > 60 then
+    if timeUntilNextTiming == 0 or currentFightTime > closestPastTime and timeUntilNextTiming > 60 then
       canFlag = true
     end
   end
@@ -722,7 +722,7 @@ local function TindralCDs()
   local canFlag = false
   local timeUntilNextSupernova = nextsupernova - currentFightTime
   for _, time in ipairs(supernova) do
-    if math.abs(currentFightTime - time) <= 5 or timeUntilNextSupernova >= 60 then
+    if nextsupernova == currentFightTime or math.abs(currentFightTime - time) <= 5 or timeUntilNextSupernova >= 60 then
       canFlag = true
     end
   end
@@ -869,7 +869,7 @@ local function FyrakkCDs()
   local canFlag = false
   local timeUntilNextCorrupt = nextCorrupt - currentFightTime
   for _, time in ipairs(corrupt) do
-    if math.abs(currentFightTime - time) <= 5 or timeUntilNextCorrupt >= 60 then
+    if nextCorrupt == currentFightTime or math.abs(currentFightTime - time) <= 5 or timeUntilNextCorrupt >= 60 then
       canFlag = true
     end
   end
@@ -877,7 +877,7 @@ local function FyrakkCDs()
   local canDance = false
   if closestPastTime and closestFutureTime then
     local timeUntilNextTiming = closestFutureTime - currentFightTime
-    if currentFightTime > closestPastTime and timeUntilNextTiming >= 30 then
+    if timeUntilNextTiming == 0 or currentFightTime > closestPastTime and timeUntilNextTiming >= 30 then
       canDance = true
     end
   end
