@@ -182,9 +182,9 @@ function findClosestTimes(timings, currentTime)
 end
 
 function findClosestPastTime(timings, currentTime)
-  local closestPastTime = nil
+  local closestPastTime = 0
   for _, time in ipairs(timings) do
-    if time <= currentTime and (closestPastTime == nil or time > closestPastTime) then
+    if time <= currentTime and (closestPastTime == 0 or time > closestPastTime) then
       closestPastTime = time
     end
   end
@@ -192,9 +192,9 @@ function findClosestPastTime(timings, currentTime)
 end
 
 function findClosestFutureTime(timings, currentTime)
-  local closestFutureTime = nil
+  local closestFutureTime = 0
   for _, time in ipairs(timings) do
-    if time > currentTime and (closestFutureTime == nil or time < closestFutureTime) then
+    if time > currentTime and (closestFutureTime == 0 or time < closestFutureTime) then
       closestFutureTime = time
     end
   end
