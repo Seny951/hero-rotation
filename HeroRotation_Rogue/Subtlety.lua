@@ -668,9 +668,11 @@ local function SmolderonCDs()
   -- actions.cds+=/use_item,name=ashes_of_the_embersoul,if=(buff.cold_blood.up|(!talent.danse_macabre&buff.shadow_dance.up
   -- |buff.danse_macabre.stack>=3)&!talent.cold_blood)|fight_remains<10
   if Settings.Commons.Enabled.Trinkets then
-    if (Player:BuffUp(S.ColdBlood) or (not S.DanseMacabre:IsAvailable() and Player:BuffUp(S.ShadowDance)
-      or Player:BuffStack(S.DanseMacabre) >= 3) and not S.ColdBlood:IsAvailable()) or HL.BossFilteredFightRemains("<", 10) then
-      if Cast(I.AshesoftheEmbersoul, nil, Settings.Commons.DisplayStyle.Trinkets) then return "Ashes of the Embersoul" end
+    if I.AshesoftheEmbersoul:IsEquippedAndReady() then
+      if canFlag and ((Player:BuffUp(S.ColdBlood) or S.ColdBlood:IsReady()) or (not S.DanseMacabre:IsAvailable() and Player:BuffUp(S.ShadowDance)
+        or Player:BuffStack(S.DanseMacabre) >= 3) and not S.ColdBlood:IsAvailable()) or HL.BossFilteredFightRemains("<", 10) then
+        if Cast(I.AshesoftheEmbersoul, nil, Settings.Commons.DisplayStyle.Trinkets) then return "Ashes of the Embersoul" end
+      end
     end
   end
 
@@ -817,9 +819,11 @@ local function TindralCDs()
   -- actions.cds+=/use_item,name=ashes_of_the_embersoul,if=(buff.cold_blood.up|(!talent.danse_macabre&buff.shadow_dance.up
   -- |buff.danse_macabre.stack>=3)&!talent.cold_blood)|fight_remains<10
   if Settings.Commons.Enabled.Trinkets then
-    if (Player:BuffUp(S.ColdBlood) or (not S.DanseMacabre:IsAvailable() and Player:BuffUp(S.ShadowDance)
-      or Player:BuffStack(S.DanseMacabre) >= 3) and not S.ColdBlood:IsAvailable()) or HL.BossFilteredFightRemains("<", 10) then
-      if Cast(I.AshesoftheEmbersoul, nil, Settings.Commons.DisplayStyle.Trinkets) then return "Ashes of the Embersoul" end
+    if I.AshesoftheEmbersoul:IsEquippedAndReady() then
+      if canFlag and ((Player:BuffUp(S.ColdBlood) or S.ColdBlood:IsReady()) or (not S.DanseMacabre:IsAvailable() and Player:BuffUp(S.ShadowDance)
+        or Player:BuffStack(S.DanseMacabre) >= 3) and not S.ColdBlood:IsAvailable()) or HL.BossFilteredFightRemains("<", 10) then
+        if Cast(I.AshesoftheEmbersoul, nil, Settings.Commons.DisplayStyle.Trinkets) then return "Ashes of the Embersoul" end
+      end
     end
   end
 
@@ -1194,9 +1198,11 @@ local function CDs ()
   -- actions.cds+=/use_item,name=ashes_of_the_embersoul,if=(buff.cold_blood.up|(!talent.danse_macabre&buff.shadow_dance.up
   -- |buff.danse_macabre.stack>=3)&!talent.cold_blood)|fight_remains<10
   if Settings.Commons.Enabled.Trinkets then
-    if (Player:BuffUp(S.ColdBlood) or (not S.DanseMacabre:IsAvailable() and Player:BuffUp(S.ShadowDance)
-      or Player:BuffStack(S.DanseMacabre) >= 3) and not S.ColdBlood:IsAvailable()) or HL.BossFilteredFightRemains("<", 10) then
+    if I.AshesoftheEmbersoul:IsEquippedAndReady() then
+      if (Player:BuffUp(S.ColdBlood) or (not S.DanseMacabre:IsAvailable() and Player:BuffUp(S.ShadowDance)
+        or Player:BuffStack(S.DanseMacabre) >= 3) and not S.ColdBlood:IsAvailable()) or HL.BossFilteredFightRemains("<", 10) then
         if Cast(I.AshesoftheEmbersoul, nil, Settings.Commons.DisplayStyle.Trinkets) then return "Ashes of the Embersoul" end
+      end
     end
   end
 
