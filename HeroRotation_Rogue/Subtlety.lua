@@ -981,7 +981,7 @@ local function FyrakkCDs()
   -- actions.cds+=/use_item,name=ashes_of_the_embersoul,if=(buff.cold_blood.up|(!talent.danse_macabre&buff.shadow_dance.up
   -- |buff.danse_macabre.stack>=3)&!talent.cold_blood)|fight_remains<10
   if Settings.Commons.Enabled.Trinkets then
-    if canFlag and ((Player:BuffUp(S.ColdBlood) or S.ColdBlood:IsReady()) or (not S.DanseMacabre:IsAvailable() and Player:BuffUp(S.ShadowDance)
+    if  I.AshesoftheEmbersoul:IsEquippedAndReady() and canFlag and ((Player:BuffUp(S.ColdBlood) or S.ColdBlood:IsReady()) or (not S.DanseMacabre:IsAvailable() and Player:BuffUp(S.ShadowDance)
       or Player:BuffStack(S.DanseMacabre) >= 3) and not S.ColdBlood:IsAvailable()) or HL.BossFilteredFightRemains("<", 10) then
       if Cast(I.AshesoftheEmbersoul, nil, Settings.Commons.DisplayStyle.Trinkets) then return "Ashes of the Embersoul" end
     end
@@ -1043,8 +1043,8 @@ local function CDs ()
   end
 
   -- Fyrakk
-  if Target:NPCID() == 204931 then
-  --if true then
+  --if Target:NPCID() == 204931 then
+  if true then
     ShouldReturn = FyrakkCDs()
     return ShouldReturn
   end
