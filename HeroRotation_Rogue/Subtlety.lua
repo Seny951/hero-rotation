@@ -864,16 +864,28 @@ local function TindralCDs()
   return false
 end
 
+-- # Cooldown Usage for Fyrakk
 local function FyrakkCDs()
   local corrupt = {0, 158}
+  local collossi = {0, 240, 330}
   local currentFightTime = HL.CombatTime()
   local nextCorrupt = findClosestFutureTime(corrupt, currentFightTime)
+  local nextColossi = findClosestFutureTime(collossi, currentFightTime)
   local closestPastTime, closestFutureTime = findClosestTimes(corrupt, currentFightTime)
 
   local canFlag = false
+  -- check if we need to hold flag for corrupt
   local timeUntilNextCorrupt = nextCorrupt - currentFightTime
   for _, time in ipairs(corrupt) do
     if nextCorrupt == currentFightTime or math.abs(currentFightTime - time) <= 5 or timeUntilNextCorrupt >= 60 then
+      canFlag = true
+    end
+  end
+
+  -- check if we need to hold flag for colossi
+  local timeUntilNextCollossi = nextColossi - currentFightTime
+  for _, time in ipairs(collossi) do
+    if nextColossi == currentFightTime or math.abs(currentFightTime - time) <= 5 or timeUntilNextCollossi >= 60 then
       canFlag = true
     end
   end
