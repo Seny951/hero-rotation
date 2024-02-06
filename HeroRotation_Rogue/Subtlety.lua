@@ -587,7 +587,7 @@ local function SmolderonCDs()
   end
 
   if HR.CDsON() and S.Flagellation:IsAvailable() and S.Flagellation:IsReady() then
-    if canFlag and S.InvigoratingShadowdust:IsAvailable() and EffectiveComboPoints >= 5 then
+    if canFlag and S.InvigoratingShadowdust:IsAvailable() and EffectiveComboPoints >= 5 and S.ShadowDance:IsReady() and S.SymbolsofDeath:IsReady() then
       if Cast(S.Flagellation, nil, Settings.Commons.DisplayStyle.Signature) then return "Cast Flagellation" end
     end
   end
@@ -730,7 +730,7 @@ local function TindralCDs()
   end
 
   if HR.CDsON() and S.Flagellation:IsAvailable() and S.Flagellation:IsReady() then
-    if canFlag and S.InvigoratingShadowdust:IsAvailable() and EffectiveComboPoints >= 5 then
+    if canFlag and S.InvigoratingShadowdust:IsAvailable() and EffectiveComboPoints >= 5 and S.ShadowDance:IsReady() and S.SymbolsofDeath:IsReady() then
       if Cast(S.Flagellation, nil, Settings.Commons.DisplayStyle.Signature) then return "Cast Flagellation Tindral" end
     end
   end
@@ -899,7 +899,7 @@ local function FyrakkCDs()
   end
 
   if HR.CDsON() and S.Flagellation:IsAvailable() and S.Flagellation:IsReady() then
-    if canFlag and S.InvigoratingShadowdust:IsAvailable() and EffectiveComboPoints >= 5 then
+    if canFlag and S.InvigoratingShadowdust:IsAvailable() and EffectiveComboPoints >= 5 and S.ShadowDance:IsReady() and S.SymbolsofDeath:IsReady() then
       if Cast(S.Flagellation, nil, Settings.Commons.DisplayStyle.Signature) then return "Cast Flagellation Fyrakk" end
     end
   end
