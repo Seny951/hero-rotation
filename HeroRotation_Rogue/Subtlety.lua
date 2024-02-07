@@ -591,7 +591,7 @@ local function SmolderonCDs()
   canFlag = canCastTiming(closestPastTime, closestFutureTime, currentFightTime, 60)
 
   local canDance = false
-  canDance = canCastTiming(closestPastTime, closestFutureTime, closestPastTime, 30)
+  canDance = canCastTiming(closestPastTime, closestFutureTime, currentFightTime, 30)
 
   if HR.CDsON() and S.Flagellation:IsAvailable() and S.Flagellation:IsReady() then
     if canFlag and S.InvigoratingShadowdust:IsAvailable() and EffectiveComboPoints >= 5 and S.ShadowDance:IsReady() and S.SymbolsofDeath:IsReady() then
