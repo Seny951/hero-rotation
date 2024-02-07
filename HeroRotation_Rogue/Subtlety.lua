@@ -718,7 +718,7 @@ local function GnarlrootCDs()
 
   -- After vanishing redance straight away
   if S.ShadowDance:IsReady() then
-    if (S.Vanish:TimeSinceLastCast() < 8 or canDance) and S.SymbolsofDeath:IsReady() then
+    if (S.Vanish:TimeSinceLastCast() < 8 or canDance and not Player:StealthUp(true, true)) and S.SymbolsofDeath:IsReady() then
       ShouldReturn = StealthMacro(S.ShadowDance, StealthEnergyRequired)
       if ShouldReturn then return "ShadowDance Macro Custom Gnarlroot " .. ShouldReturn end
     end
@@ -1024,7 +1024,7 @@ local function SmolderonCDs()
   canDance = canCastTiming(closestPastTime, closestFutureTime, currentFightTime, 30)
 
   local canShadowBlades = false
-  -- 70 seconds to allow for the entire duration of dmg amp as Blades won't be used immediately
+  -- 70 seconds to allow for the entire duration of dmg amp (-20) as Blades won't be used immediately
   canShadowBlades = canCastTiming(closestPastTime,closestFutureTime, currentFightTime, 70)
 
   if HR.CDsON() and S.Flagellation:IsAvailable() and S.Flagellation:IsReady() then
@@ -1059,7 +1059,7 @@ local function SmolderonCDs()
 
   -- After vanishing redance straight away
   if S.ShadowDance:IsReady() then
-    if (S.Vanish:TimeSinceLastCast() < 8 or canDance) and S.SymbolsofDeath:IsReady() then
+    if (S.Vanish:TimeSinceLastCast() < 8 or canDance and not Player:StealthUp(true, true)) and S.SymbolsofDeath:IsReady() then
       ShouldReturn = StealthMacro(S.ShadowDance, StealthEnergyRequired)
       if ShouldReturn then return "ShadowDance Macro Custom Smolderon " .. ShouldReturn end
     end
