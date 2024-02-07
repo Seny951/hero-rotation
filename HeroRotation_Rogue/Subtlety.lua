@@ -262,6 +262,23 @@ local function Trinket_Condition()
     and I.WitherbarksBranch:CooldownRemains() <= 8 or I.BandolierOfTwistedBlades:IsEquipped() or S.InvigoratingShadowdust:IsAvailable())
 end
 
+local function canCastPcnt(percent, holdWindow)
+  local canFlag = false
+  if Target:TimeToX(percent) >= holdWindow then
+    canFlag = true
+  end
+  return canFlag
+end
+
+local function canCastTiming(lastTime, nextTime, currentFightTime, holdWindow)
+  local canCast = false
+  local timeUntilNextTiming = nextTime - currentFightTime
+  if timeUntilNextTiming == 0 or currentFightTime > lastTime and timeUntilNextTiming >= holdWindow then
+    canCast = true
+  end
+  return canCast
+end
+
 -- # Finishers
 -- ReturnSpellOnly and StealthSpell parameters are to Predict Finisher in case of Stealth Macros
 local function Finish (ReturnSpellOnly, StealthSpell)
@@ -866,36 +883,20 @@ end
 
 -- # Cooldown Usage for Fyrakk
 local function FyrakkCDs()
-  local corrupt = {0, 158}
-  local collossi = {0, 240, 330}
   local currentFightTime = HL.CombatTime()
-  local nextCorrupt = findClosestFutureTime(corrupt, currentFightTime)
-  local nextColossi = findClosestFutureTime(collossi, currentFightTime)
-  local closestPastTime, closestFutureTime = findClosestTimes(corrupt, currentFightTime)
+  local corrupt = {0, 158}
+  local lastCorrupt, nextCorrupt = findClosestTimes(corrupt, currentFightTime)
+  local colossi = {0, 240, 330}
+  local lastColossi, nextColossi = findClosestTimes(colossi, currentFightTime)
 
-  local canFlag = false
-  -- check if we need to hold flag for corrupt
-  local timeUntilNextCorrupt = nextCorrupt - currentFightTime
-  for _, time in ipairs(corrupt) do
-    if nextCorrupt == currentFightTime or math.abs(currentFightTime - time) <= 5 or timeUntilNextCorrupt >= 60 then
-      canFlag = true
-    end
+  local canFlag = canCastPcnt(70, 60)
+  if canFlag then
+    canFlag = canCastTiming(lastColossi, nextColossi, currentFightTime, 60)
   end
 
-  -- check if we need to hold flag for colossi
-  local timeUntilNextCollossi = nextColossi - currentFightTime
-  for _, time in ipairs(collossi) do
-    if nextColossi == currentFightTime or math.abs(currentFightTime - time) <= 5 or timeUntilNextCollossi >= 60 then
-      canFlag = true
-    end
-  end
-
-  local canDance = false
-  if closestPastTime and closestFutureTime then
-    local timeUntilNextTiming = closestFutureTime - currentFightTime
-    if timeUntilNextTiming == 0 or currentFightTime > closestPastTime and timeUntilNextTiming >= 30 then
-      canDance = true
-    end
+  local canDance = canCastPcnt(70, 30)
+  if canDance then
+    canDance = canCastTiming(lastColossi, nextColossi, currentFightTime, 30)
   end
 
   if HR.CDsON() and S.Flagellation:IsAvailable() and S.Flagellation:IsReady() then
@@ -1048,21 +1049,18 @@ local function CDs ()
 
   -- Smolderon
   if Target:NPCID() == 200927 then
-  --if true then
     ShouldReturn = SmolderonCDs()
     return ShouldReturn
   end
 
   -- Tindral
   if Target:NPCID() == 209090 then
-  --if true then
     ShouldReturn = TindralCDs()
     return ShouldReturn
   end
 
   -- Fyrakk
-  if Target:NPCID() == 204931 then
-  --if true then
+  if Target:NPCID() == 204931 or Target:NPCID() == 207796 or Target:NPCID() == 214012 or Target:NPCID() == 214608 then
     ShouldReturn = FyrakkCDs()
     return ShouldReturn
   end
