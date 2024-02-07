@@ -710,7 +710,7 @@ local function GnarlrootCDs()
   -- &(!talent.flagellation|cooldown.flagellation.remains>20)&spell_targets.shuriken_storm>=3
   -- Shuriken Tornado with Symbols of Death on 3 and more targets
   if HR.CDsON() and S.ShurikenTornado:IsAvailable() and S.ShurikenTornado:IsReady() then
-    if SnD_Condition() and (S.SymbolsofDeath:IsReady() or Player:BuffUp(S.SymbolsofDeath)) and EffectiveComboPoints <= 2 and not Player:BuffUp(S.Premeditation)
+    if canDance and SnD_Condition() and (S.SymbolsofDeath:IsReady() or Player:BuffUp(S.SymbolsofDeath)) and EffectiveComboPoints <= 2 and not Player:BuffUp(S.Premeditation)
       and (not S.Flagellation:IsAvailable() or S.Flagellation:CooldownRemains() > 20) and MeleeEnemies10yCount >= 3 then
       if Cast(S.ShurikenTornado, Settings.Subtlety.GCDasOffGCD.ShurikenTornado) then return "Cast Shuriken Tornado Gnarlroot" end
     end
