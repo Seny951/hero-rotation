@@ -1246,8 +1246,7 @@ local function CDs ()
 
   -- Gnarlroot
   -- Gnarlroot, Tainted Lasher, Tainted Treant
-  -- if Target:NPCID() == 209333 or Target:NPCID() == 210231 or Target:NPCID() == 211904 then
-  if true then
+  if Target:NPCID() == 209333 or Target:NPCID() == 210231 or Target:NPCID() == 211904 then
     ShouldReturn = GnarlrootCDs()
     return ShouldReturn
   end
