@@ -581,64 +581,7 @@ local function StealthMacro (StealthSpell, EnergyThreshold)
   return false
 end
 
--- # Cooldown Usage for Smolderon
-local function SmolderonCDs()
-  local WorldInFlamesTimings = {0, 68, 167, 265, 364}
-  local currentFightTime = HL.CombatTime()
-  local closestPastTime, closestFutureTime = findClosestTimes(WorldInFlamesTimings, currentFightTime)
-
-  local canFlag = false
-  canFlag = canCastTiming(closestPastTime, closestFutureTime, currentFightTime, 60)
-
-  local canDance = false
-  canDance = canCastTiming(closestPastTime, closestFutureTime, currentFightTime, 30)
-
-  if HR.CDsON() and S.Flagellation:IsAvailable() and S.Flagellation:IsReady() then
-    if canFlag and S.InvigoratingShadowdust:IsAvailable() and EffectiveComboPoints >= 5 and S.ShadowDance:IsReady() and S.SymbolsofDeath:IsReady() then
-      if Cast(S.Flagellation, nil, Settings.Commons.DisplayStyle.Signature) then return "Cast Flagellation" end
-    end
-  end
-
-  if HR.CDsON() and S.SymbolsofDeath:IsReady()  then
-    if SnD_Condition() and S.ShadowDance:IsReady() and canDance and not Player:StealthUp(true, true) then
-      if Cast(S.SymbolsofDeath, Settings.Subtlety.OffGCDasOffGCD.SymbolsofDeath) then return "Cast Symbols of Death" end
-    end
-  end
-
-  if HR.CDsON() and S.ShadowBlades:IsReady() then
-    if SnD_Condition() and (EffectiveComboPoints <= 1 or Player:HasTier(31, 4))
-      and (Player:BuffUp(S.Flagellation) or Player:BuffUp(S.FlagellationPersistBuff) or not S.Flagellation:IsAvailable()) then
-      if Cast(S.ShadowBlades, Settings.Subtlety.OffGCDasOffGCD.ShadowBlades) then return "Cast Shadow Blades" end
-    end
-  end
-
-  -- Double Dance Profile
-  -- Short DPS windows so we want to vanish within 5 seconds of the first secret Technique to pull shadow blades and fit a 2nd secret technique cast into the window.
-  -- Double Dance on the pull so the 2nd sec technique in the intermission naturally aligns with CB
-  if S.Vanish:IsReady() then
-    if S.SecretTechnique:TimeSinceLastCast() < 5 and (Player:BuffUp(S.Flagellation) or Player:BuffUp(S.FlagellationPersistBuff))
-      and (S.ShadowBlades:CooldownRemains() <= 30 or S.ShadowBlades:CooldownRemains() >= 90) then
-      ShouldReturn = StealthMacro(S.Vanish, StealthEnergyRequired)
-      if ShouldReturn then return "Vanish Macro Custom Smolderon " .. ShouldReturn end
-    end
-  end
-
-  -- After vanishing redance as soon as subterfuge ends
-  -- Allow dance if not within 30 seconds of WorldInFlames
-  if S.ShadowDance:IsReady() then
-    if (S.Vanish:TimeSinceLastCast() < 8 or canDance) and S.SymbolsofDeath:IsReady() then
-      ShouldReturn = StealthMacro(S.ShadowDance, StealthEnergyRequired)
-      if ShouldReturn then return "ShadowDance Macro Custom Smolderon " .. ShouldReturn end
-    end
-  end
-
-  -- actions.cds+=/shadow_dance,if=!buff.shadow_dance.up&fight_remains<=8+talent.subterfuge.enabled
-  if HR.CDsON() and S.ShadowDance:IsAvailable() and MayBurnShadowDance() and S.ShadowDance:IsReady() then
-    if not Player:BuffUp(S.ShadowDance) and HL.BossFilteredFightRemains("<=", 8 + 3*num(S.Subterfuge:IsAvailable())) then
-      if Cast(S.ShadowDance) then return "Cast Shadow Dance" end
-    end
-  end
-
+local function PotionsRacialsTrinkets()
   -- actions.cds+=/potion,if=buff.bloodlust.react|fight_remains<30|buff.symbols_of_death.up
   -- &(buff.shadow_blades.up|cooldown.shadow_blades.remains<=10)
   if Settings.Commons.Enabled.Potions then
@@ -676,7 +619,7 @@ local function SmolderonCDs()
   -- |buff.danse_macabre.stack>=3)&!talent.cold_blood)|fight_remains<10
   if Settings.Commons.Enabled.Trinkets then
     if I.AshesoftheEmbersoul:IsEquippedAndReady() then
-      if canFlag and ((Player:BuffUp(S.ColdBlood) or S.ColdBlood:IsReady()) or (not S.DanseMacabre:IsAvailable() and Player:BuffUp(S.ShadowDance)
+      if Player:BuffUp(S.Flagellation) and ((Player:BuffUp(S.ColdBlood) or S.ColdBlood:IsReady()) or (not S.DanseMacabre:IsAvailable() and Player:BuffUp(S.ShadowDance)
         or Player:BuffStack(S.DanseMacabre) >= 3) and not S.ColdBlood:IsAvailable()) or HL.BossFilteredFightRemains("<", 10) then
         if Cast(I.AshesoftheEmbersoul, nil, Settings.Commons.DisplayStyle.Trinkets) then return "Ashes of the Embersoul" end
       end
@@ -712,10 +655,424 @@ local function SmolderonCDs()
     local TrinketToUse = Player:GetUseableItems(OnUseExcludes)
     if TrinketToUse then
       if Cast(TrinketToUse, nil, Settings.Commons.DisplayStyle.Trinkets) then
-        return "Generic use_items for " .. TrinketToUse:Name()
+        return "Generic use_items for" .. TrinketToUse:Name()
       end
     end
   end
+end
+
+-- # Cooldown Usage for Gnarlroot
+local function GnarlrootCDs()
+  local UprootedAgony = {0, 120, 270}
+  local currentFightTime = HL.CombatTime()
+  local closestPastTime, closestFutureTime = findClosestTimes(UprootedAgony, currentFightTime)
+
+  local canFlag = false
+  canFlag = canCastTiming(closestPastTime, closestFutureTime, currentFightTime, 60)
+
+  local canDance = false
+  canDance = canCastTiming(closestPastTime, closestFutureTime, currentFightTime, 30)
+
+  local canShadowBlades = false
+  canShadowBlades = canCastTiming(closestPastTime, closestFutureTime, currentFightTime, 90)
+
+  if HR.CDsON() and S.Flagellation:IsAvailable() and S.Flagellation:IsReady() then
+    if canFlag and S.InvigoratingShadowdust:IsAvailable() and EffectiveComboPoints >= 5 and S.ShadowDance:IsReady() and S.SymbolsofDeath:IsReady() then
+      if Cast(S.Flagellation, nil, Settings.Commons.DisplayStyle.Signature) then return "Cast Flagellation Gnarlroot" end
+    end
+  end
+
+  if HR.CDsON() and S.SymbolsofDeath:IsReady()  then
+    if SnD_Condition() and S.ShadowDance:IsReady() and canDance and not Player:StealthUp(true, true) then
+      if Cast(S.SymbolsofDeath, Settings.Subtlety.OffGCDasOffGCD.SymbolsofDeath) then return "Cast Symbols of Death Gnarlroot" end
+    end
+  end
+
+  if HR.CDsON() and S.ShadowBlades:IsReady() then
+    if canShadowBlades and SnD_Condition() and (EffectiveComboPoints <= 1 or Player:HasTier(31, 4))
+      and (Player:BuffUp(S.Flagellation) or Player:BuffUp(S.FlagellationPersistBuff) or not S.Flagellation:IsAvailable()) then
+      if Cast(S.ShadowBlades, Settings.Subtlety.OffGCDasOffGCD.ShadowBlades) then return "Cast Shadow Blades Gnarlroot" end
+    end
+  end
+
+  -- Double Dance Profile
+  -- Short DPS windows so we want to vanish within 5 seconds of the first secret Technique to pull shadow blades and fit a 2nd secret technique cast into the window.
+  -- Double Dance on the pull so the 2nd sec technique in the intermission naturally aligns with CB
+  if S.Vanish:IsReady() then
+    if S.SecretTechnique:TimeSinceLastCast() < 5 and (Player:BuffUp(S.Flagellation) or Player:BuffUp(S.FlagellationPersistBuff))
+      and (S.ShadowBlades:CooldownRemains() <= 30 or S.ShadowBlades:CooldownRemains() >= 90) then
+      ShouldReturn = StealthMacro(S.Vanish, StealthEnergyRequired)
+      if ShouldReturn then return "Vanish Macro Custom Gnarlroot " .. ShouldReturn end
+    end
+  end
+
+  -- actions.cds+=/shuriken_tornado,if=variable.snd_condition&buff.symbols_of_death.up&combo_points<=2&!buff.premeditation.up
+  -- &(!talent.flagellation|cooldown.flagellation.remains>20)&spell_targets.shuriken_storm>=3
+  -- Shuriken Tornado with Symbols of Death on 3 and more targets
+  if HR.CDsON() and S.ShurikenTornado:IsAvailable() and S.ShurikenTornado:IsReady() then
+    if SnD_Condition() and (S.SymbolsofDeath:IsReady() or Player:BuffUp(S.SymbolsofDeath)) and EffectiveComboPoints <= 2 and not Player:BuffUp(S.Premeditation)
+      and (not S.Flagellation:IsAvailable() or S.Flagellation:CooldownRemains() > 20) and MeleeEnemies10yCount >= 3 then
+      if Cast(S.ShurikenTornado, Settings.Subtlety.GCDasOffGCD.ShurikenTornado) then return "Cast Shuriken Tornado Gnarlroot" end
+    end
+  end
+
+  -- After vanishing redance straight away
+  if S.ShadowDance:IsReady() then
+    if (S.Vanish:TimeSinceLastCast() < 8 or canDance) and S.SymbolsofDeath:IsReady() then
+      ShouldReturn = StealthMacro(S.ShadowDance, StealthEnergyRequired)
+      if ShouldReturn then return "ShadowDance Macro Custom Gnarlroot " .. ShouldReturn end
+    end
+  end
+
+  -- actions.cds+=/shadow_dance,if=!buff.shadow_dance.up&fight_remains<=8+talent.subterfuge.enabled
+  if HR.CDsON() and S.ShadowDance:IsAvailable() and MayBurnShadowDance() and S.ShadowDance:IsReady() then
+    if not Player:BuffUp(S.ShadowDance) and HL.BossFilteredFightRemains("<=", 8 + 3*num(S.Subterfuge:IsAvailable())) then
+      if Cast(S.ShadowDance) then return "Cast Shadow Dance Gnarlroot" end
+    end
+  end
+
+  ShouldReturn = PotionsRacialsTrinkets()
+  if ShouldReturn then return ShouldReturn end
+
+  return false
+end
+
+-- # Cooldown Usage for Igira
+local function IgiraCDs()
+  if HR.CDsON() and S.Flagellation:IsAvailable() and S.Flagellation:IsReady() then
+    if S.InvigoratingShadowdust:IsAvailable() and EffectiveComboPoints >= 5 and S.ShadowDance:IsReady() and S.SymbolsofDeath:IsReady() and S.ShadowBlades:CooldownRemains() <= 30 then
+      if Cast(S.Flagellation, nil, Settings.Commons.DisplayStyle.Signature) then return "Cast Flagellation Igira" end
+    end
+  end
+
+  if HR.CDsON() and S.SymbolsofDeath:IsReady()  then
+    if SnD_Condition() and S.ShadowDance:IsReady() and not Player:StealthUp(true, true) then
+      if Cast(S.SymbolsofDeath, Settings.Subtlety.OffGCDasOffGCD.SymbolsofDeath) then return "Cast Symbols of Death Igira" end
+    end
+  end
+
+  if HR.CDsON() and S.ShadowBlades:IsReady() then
+    if SnD_Condition() and (EffectiveComboPoints <= 1 or Player:HasTier(31, 4))
+      and (Player:BuffUp(S.Flagellation) or Player:BuffUp(S.FlagellationPersistBuff) or not S.Flagellation:IsAvailable()) then
+      if Cast(S.ShadowBlades, Settings.Subtlety.OffGCDasOffGCD.ShadowBlades) then return "Cast Shadow Blades Igira" end
+    end
+  end
+
+  -- Double Dance Profile
+  -- Short DPS windows so we want to vanish within 5 seconds of the first secret Technique to pull shadow blades and fit a 2nd secret technique cast into the window.
+  -- Double Dance on the pull so the 2nd sec technique in the intermission naturally aligns with CB
+  if S.Vanish:IsReady() then
+    if S.SecretTechnique:TimeSinceLastCast() < 5 and (Player:BuffUp(S.Flagellation) or Player:BuffUp(S.FlagellationPersistBuff))
+      and (S.ShadowBlades:CooldownRemains() <= 30 or S.ShadowBlades:CooldownRemains() >= 90) then
+      ShouldReturn = StealthMacro(S.Vanish, StealthEnergyRequired)
+      if ShouldReturn then return "Vanish Macro Custom Igira " .. ShouldReturn end
+    end
+  end
+
+  -- actions.cds+=/shuriken_tornado,if=variable.snd_condition&buff.symbols_of_death.up&combo_points<=2&!buff.premeditation.up
+  -- &(!talent.flagellation|cooldown.flagellation.remains>20)&spell_targets.shuriken_storm>=3
+  -- Shuriken Tornado with Symbols of Death on 3 and more targets
+  -- Standard APL tornado suggestion (only on roots), Cant know which roots each person is assigned to so suggest it as standard on all roots if its up
+  if HR.CDsON() and S.ShurikenTornado:IsAvailable() and S.ShurikenTornado:IsReady() then
+    if SnD_Condition() and (S.SymbolsofDeath:IsReady() or Player:BuffUp(S.SymbolsofDeath)) and EffectiveComboPoints <= 2 and not Player:BuffUp(S.Premeditation)
+      and (not S.Flagellation:IsAvailable() or S.Flagellation:CooldownRemains() > 20) and MeleeEnemies10yCount >= 3 then
+      if Cast(S.ShurikenTornado, Settings.Subtlety.GCDasOffGCD.ShurikenTornado) then return "Cast Shuriken Tornado Igira" end
+    end
+  end
+
+  -- After vanishing redance as soon as subterfuge ends and symbols is ready or already up
+  if S.ShadowDance:IsReady() then
+    if not Player:StealthUp(true, true) and (S.SymbolsofDeath:IsReady() or (Player:BuffUp(S.SymbolsofDeath) and Player:BuffRemains(S.SymbolsofDeath) >= 8)) then
+      ShouldReturn = StealthMacro(S.ShadowDance, StealthEnergyRequired)
+      if ShouldReturn then return "ShadowDance Macro Custom Igira " .. ShouldReturn end
+    end
+  end
+
+  -- actions.cds+=/shadow_dance,if=!buff.shadow_dance.up&fight_remains<=8+talent.subterfuge.enabled
+  if HR.CDsON() and S.ShadowDance:IsAvailable() and MayBurnShadowDance() and S.ShadowDance:IsReady() then
+    if not Player:BuffUp(S.ShadowDance) and HL.BossFilteredFightRemains("<=", 8 + 3*num(S.Subterfuge:IsAvailable())) then
+      if Cast(S.ShadowDance) then return "Cast Shadow Dance Igira" end
+    end
+  end
+
+  ShouldReturn = PotionsRacialsTrinkets()
+  if ShouldReturn then return ShouldReturn end
+
+  return false
+end
+
+-- # Cooldown Usage for Volcoross
+local function VolcorossCDs()
+  if HR.CDsON() and S.Flagellation:IsAvailable() and S.Flagellation:IsReady() then
+    if S.InvigoratingShadowdust:IsAvailable() and EffectiveComboPoints >= 5 and S.ShadowDance:IsReady() and S.SymbolsofDeath:IsReady() and S.ShadowBlades:CooldownRemains() <= 30 then
+      if Cast(S.Flagellation, nil, Settings.Commons.DisplayStyle.Signature) then return "Cast Flagellation Volcoross" end
+    end
+  end
+
+  if HR.CDsON() and S.SymbolsofDeath:IsReady()  then
+    if SnD_Condition() and S.ShadowDance:IsReady() and not Player:StealthUp(true, true) then
+      if Cast(S.SymbolsofDeath, Settings.Subtlety.OffGCDasOffGCD.SymbolsofDeath) then return "Cast Symbols of Death Volcoross" end
+    end
+  end
+
+  if HR.CDsON() and S.ShadowBlades:IsReady() then
+    if SnD_Condition() and (EffectiveComboPoints <= 1 or Player:HasTier(31, 4))
+      and (Player:BuffUp(S.Flagellation) or Player:BuffUp(S.FlagellationPersistBuff) or not S.Flagellation:IsAvailable()) then
+      if Cast(S.ShadowBlades, Settings.Subtlety.OffGCDasOffGCD.ShadowBlades) then return "Cast Shadow Blades Volcoross" end
+    end
+  end
+
+  -- Double Dance Profile
+  -- Short DPS windows so we want to vanish within 5 seconds of the first secret Technique to pull shadow blades and fit a 2nd secret technique cast into the window.
+  -- Double Dance on the pull so the 2nd sec technique in the intermission naturally aligns with CB
+  if S.Vanish:IsReady() then
+    if S.SecretTechnique:TimeSinceLastCast() < 5 and (Player:BuffUp(S.Flagellation) or Player:BuffUp(S.FlagellationPersistBuff))
+      and (S.ShadowBlades:CooldownRemains() <= 30 or S.ShadowBlades:CooldownRemains() >= 90) then
+      ShouldReturn = StealthMacro(S.Vanish, StealthEnergyRequired)
+      if ShouldReturn then return "Vanish Macro Custom Volcoross " .. ShouldReturn end
+    end
+  end
+
+  -- After vanishing redance as soon as subterfuge ends and symbols is ready or already up
+  if S.ShadowDance:IsReady() then
+    if not Player:StealthUp(true, true) and (S.SymbolsofDeath:IsReady() or (Player:BuffUp(S.SymbolsofDeath) and Player:BuffRemains(S.SymbolsofDeath) >= 8)) then
+      ShouldReturn = StealthMacro(S.ShadowDance, StealthEnergyRequired)
+      if ShouldReturn then return "ShadowDance Macro Custom Volcoross " .. ShouldReturn end
+    end
+  end
+
+  -- actions.cds+=/shadow_dance,if=!buff.shadow_dance.up&fight_remains<=8+talent.subterfuge.enabled
+  if HR.CDsON() and S.ShadowDance:IsAvailable() and MayBurnShadowDance() and S.ShadowDance:IsReady() then
+    if not Player:BuffUp(S.ShadowDance) and HL.BossFilteredFightRemains("<=", 8 + 3*num(S.Subterfuge:IsAvailable())) then
+      if Cast(S.ShadowDance) then return "Cast Shadow Dance Volcoross" end
+    end
+  end
+
+  ShouldReturn = PotionsRacialsTrinkets()
+  if ShouldReturn then return ShouldReturn end
+
+  return false
+end
+
+-- # Cooldown Usage for Council
+local function CouncilCDs()
+  if HR.CDsON() and S.Flagellation:IsAvailable() and S.Flagellation:IsReady() then
+    if S.InvigoratingShadowdust:IsAvailable() and EffectiveComboPoints >= 5 and S.ShadowDance:IsReady() and S.SymbolsofDeath:IsReady() and S.ShadowBlades:CooldownRemains() <= 30 then
+      if Cast(S.Flagellation, nil, Settings.Commons.DisplayStyle.Signature) then return "Cast Flagellation Council" end
+    end
+  end
+
+  if HR.CDsON() and S.SymbolsofDeath:IsReady()  then
+    if SnD_Condition() and S.ShadowDance:IsReady() and not Player:StealthUp(true, true) then
+      if Cast(S.SymbolsofDeath, Settings.Subtlety.OffGCDasOffGCD.SymbolsofDeath) then return "Cast Symbols of Death Council" end
+    end
+  end
+
+  if HR.CDsON() and S.ShadowBlades:IsReady() then
+    if SnD_Condition() and (EffectiveComboPoints <= 1 or Player:HasTier(31, 4))
+      and (Player:BuffUp(S.Flagellation) or Player:BuffUp(S.FlagellationPersistBuff) or not S.Flagellation:IsAvailable()) then
+      if Cast(S.ShadowBlades, Settings.Subtlety.OffGCDasOffGCD.ShadowBlades) then return "Cast Shadow Blades Council" end
+    end
+  end
+
+  -- Double Dance Profile
+  if S.Vanish:IsReady() then
+    if S.SecretTechnique:TimeSinceLastCast() < 5 and (Player:BuffUp(S.Flagellation) or Player:BuffUp(S.FlagellationPersistBuff))
+      and (S.ShadowBlades:CooldownRemains() <= 30 or S.ShadowBlades:CooldownRemains() >= 90) then
+      ShouldReturn = StealthMacro(S.Vanish, StealthEnergyRequired)
+      if ShouldReturn then return "Vanish Macro Custom Council " .. ShouldReturn end
+    end
+  end
+
+  -- After vanishing redance as soon as subterfuge ends and symbols is ready or already up
+  if S.ShadowDance:IsReady() then
+    if not Player:StealthUp(true, true) and (S.SymbolsofDeath:IsReady() or (Player:BuffUp(S.SymbolsofDeath) and Player:BuffRemains(S.SymbolsofDeath) >= 8)) then
+      ShouldReturn = StealthMacro(S.ShadowDance, StealthEnergyRequired)
+      if ShouldReturn then return "ShadowDance Macro Custom Council " .. ShouldReturn end
+    end
+  end
+
+  -- actions.cds+=/shadow_dance,if=!buff.shadow_dance.up&fight_remains<=8+talent.subterfuge.enabled
+  if HR.CDsON() and S.ShadowDance:IsAvailable() and MayBurnShadowDance() and S.ShadowDance:IsReady() then
+    if not Player:BuffUp(S.ShadowDance) and HL.BossFilteredFightRemains("<=", 8 + 3*num(S.Subterfuge:IsAvailable())) then
+      if Cast(S.ShadowDance) then return "Cast Shadow Dance Council" end
+    end
+  end
+
+  ShouldReturn = PotionsRacialsTrinkets()
+  if ShouldReturn then return ShouldReturn end
+
+  return false
+end
+
+-- # Cooldown Usage for Larodar
+local function LarodarCDs()
+  if HR.CDsON() and S.Flagellation:IsAvailable() and S.Flagellation:IsReady() then
+    if S.InvigoratingShadowdust:IsAvailable() and EffectiveComboPoints >= 5 and S.ShadowDance:IsReady() and S.SymbolsofDeath:IsReady() and S.ShadowBlades:CooldownRemains() <= 30 then
+      if Cast(S.Flagellation, nil, Settings.Commons.DisplayStyle.Signature) then return "Cast Flagellation Larodar" end
+    end
+  end
+
+  if HR.CDsON() and S.SymbolsofDeath:IsReady()  then
+    if SnD_Condition() and S.ShadowDance:IsReady() and not Player:StealthUp(true, true) then
+      if Cast(S.SymbolsofDeath, Settings.Subtlety.OffGCDasOffGCD.SymbolsofDeath) then return "Cast Symbols of Death Larodar" end
+    end
+  end
+
+  if HR.CDsON() and S.ShadowBlades:IsReady() then
+    if SnD_Condition() and (EffectiveComboPoints <= 1 or Player:HasTier(31, 4))
+      and (Player:BuffUp(S.Flagellation) or Player:BuffUp(S.FlagellationPersistBuff) or not S.Flagellation:IsAvailable()) then
+      if Cast(S.ShadowBlades, Settings.Subtlety.OffGCDasOffGCD.ShadowBlades) then return "Cast Shadow Blades Larodar" end
+    end
+  end
+
+  -- Double Dance Profile
+  -- Short DPS windows so we want to vanish within 5 seconds of the first secret Technique to pull shadow blades and fit a 2nd secret technique cast into the window.
+  -- Double Dance on the pull so the 2nd sec technique in the intermission naturally aligns with CB
+  if S.Vanish:IsReady() then
+    if S.SecretTechnique:TimeSinceLastCast() < 5 and (Player:BuffUp(S.Flagellation) or Player:BuffUp(S.FlagellationPersistBuff))
+      and (S.ShadowBlades:CooldownRemains() <= 30 or S.ShadowBlades:CooldownRemains() >= 90) then
+      ShouldReturn = StealthMacro(S.Vanish, StealthEnergyRequired)
+      if ShouldReturn then return "Vanish Macro Custom Larodar " .. ShouldReturn end
+    end
+  end
+
+  -- After vanishing redance as soon as subterfuge ends and symbols is ready or already up
+  if S.ShadowDance:IsReady() then
+    if not Player:StealthUp(true, true) and (S.SymbolsofDeath:IsReady() or (Player:BuffUp(S.SymbolsofDeath) and Player:BuffRemains(S.SymbolsofDeath) >= 8)) then
+      ShouldReturn = StealthMacro(S.ShadowDance, StealthEnergyRequired)
+      if ShouldReturn then return "ShadowDance Macro Custom Larodar " .. ShouldReturn end
+    end
+  end
+
+  -- actions.cds+=/shadow_dance,if=!buff.shadow_dance.up&fight_remains<=8+talent.subterfuge.enabled
+  if HR.CDsON() and S.ShadowDance:IsAvailable() and MayBurnShadowDance() and S.ShadowDance:IsReady() then
+    if not Player:BuffUp(S.ShadowDance) and HL.BossFilteredFightRemains("<=", 8 + 3*num(S.Subterfuge:IsAvailable())) then
+      if Cast(S.ShadowDance) then return "Cast Shadow Dance Larodar" end
+    end
+  end
+
+  ShouldReturn = PotionsRacialsTrinkets()
+  if ShouldReturn then return ShouldReturn end
+
+  return false
+end
+
+-- # Cooldown Usage for Nymue
+local function NymueCDs()
+  if HR.CDsON() and S.Flagellation:IsAvailable() and S.Flagellation:IsReady() then
+    if S.InvigoratingShadowdust:IsAvailable() and EffectiveComboPoints >= 5 and S.ShadowDance:IsReady() and S.SymbolsofDeath:IsReady()then
+      if Cast(S.Flagellation, nil, Settings.Commons.DisplayStyle.Signature) then return "Cast Flagellation Council" end
+    end
+  end
+
+  if HR.CDsON() and S.SymbolsofDeath:IsReady()  then
+    if SnD_Condition() and S.ShadowDance:IsReady() and not Player:StealthUp(true, true) then
+      if Cast(S.SymbolsofDeath, Settings.Subtlety.OffGCDasOffGCD.SymbolsofDeath) then return "Cast Symbols of Death Council" end
+    end
+  end
+
+  if HR.CDsON() and S.ShadowBlades:IsReady() then
+    if SnD_Condition() and (EffectiveComboPoints <= 1 or Player:HasTier(31, 4))
+      and (Player:BuffUp(S.Flagellation) or Player:BuffUp(S.FlagellationPersistBuff) or not S.Flagellation:IsAvailable()) then
+      if Cast(S.ShadowBlades, Settings.Subtlety.OffGCDasOffGCD.ShadowBlades) then return "Cast Shadow Blades Council" end
+    end
+  end
+
+  -- Double Dance Profile
+  -- Short DPS windows so we want to vanish within 5 seconds of the first secret Technique to pull shadow blades and fit a 2nd secret technique cast into the window.
+  -- Double Dance on the pull so the 2nd sec technique in the intermission naturally aligns with CB
+  if S.Vanish:IsReady() then
+    if S.SecretTechnique:TimeSinceLastCast() < 5 and (Player:BuffUp(S.Flagellation) or Player:BuffUp(S.FlagellationPersistBuff))
+      and (S.ShadowBlades:CooldownRemains() <= 30 or S.ShadowBlades:CooldownRemains() >= 90) then
+      ShouldReturn = StealthMacro(S.Vanish, StealthEnergyRequired)
+      if ShouldReturn then return "Vanish Macro Custom Council " .. ShouldReturn end
+    end
+  end
+
+  -- After vanishing redance as soon as subterfuge ends and symbols is ready or already up
+  if S.ShadowDance:IsReady() then
+    if not Player:StealthUp(true, true) and (S.SymbolsofDeath:IsReady() or (Player:BuffUp(S.SymbolsofDeath) and Player:BuffRemains(S.SymbolsofDeath) >= 8)) then
+      ShouldReturn = StealthMacro(S.ShadowDance, StealthEnergyRequired)
+      if ShouldReturn then return "ShadowDance Macro Custom Council " .. ShouldReturn end
+    end
+  end
+
+  -- actions.cds+=/shadow_dance,if=!buff.shadow_dance.up&fight_remains<=8+talent.subterfuge.enabled
+  if HR.CDsON() and S.ShadowDance:IsAvailable() and MayBurnShadowDance() and S.ShadowDance:IsReady() then
+    if not Player:BuffUp(S.ShadowDance) and HL.BossFilteredFightRemains("<=", 8 + 3*num(S.Subterfuge:IsAvailable())) then
+      if Cast(S.ShadowDance) then return "Cast Shadow Dance Council" end
+    end
+  end
+
+  ShouldReturn = PotionsRacialsTrinkets()
+  if ShouldReturn then return ShouldReturn end
+
+  return false
+end
+
+-- # Cooldown Usage for Smolderon
+local function SmolderonCDs()
+  local WorldInFlamesTimings = {0, 68, 167, 265, 364}
+  local currentFightTime = HL.CombatTime()
+  local closestPastTime, closestFutureTime = findClosestTimes(WorldInFlamesTimings, currentFightTime)
+
+  local canFlag = false
+  canFlag = canCastTiming(closestPastTime, closestFutureTime, currentFightTime, 60)
+
+  local canDance = false
+  canDance = canCastTiming(closestPastTime, closestFutureTime, currentFightTime, 30)
+
+  local canShadowBlades = false
+  canShadowBlades = canCastTiming(closestPastTime,closestFutureTime, currentFightTime, 90)
+
+  if HR.CDsON() and S.Flagellation:IsAvailable() and S.Flagellation:IsReady() then
+    if canFlag and S.InvigoratingShadowdust:IsAvailable() and EffectiveComboPoints >= 5 and S.ShadowDance:IsReady() and S.SymbolsofDeath:IsReady() and S.ShadowBlades:CooldownRemains() <= 30 then
+      if Cast(S.Flagellation, nil, Settings.Commons.DisplayStyle.Signature) then return "Cast Flagellation Smolderon" end
+    end
+  end
+
+  if HR.CDsON() and S.SymbolsofDeath:IsReady()  then
+    if SnD_Condition() and S.ShadowDance:IsReady() and canDance and not Player:StealthUp(true, true) then
+      if Cast(S.SymbolsofDeath, Settings.Subtlety.OffGCDasOffGCD.SymbolsofDeath) then return "Cast Symbols of Death Smolderon" end
+    end
+  end
+
+  if HR.CDsON() and S.ShadowBlades:IsReady() then
+    if canShadowBlades and SnD_Condition() and (EffectiveComboPoints <= 1 or Player:HasTier(31, 4))
+      and (Player:BuffUp(S.Flagellation) or Player:BuffUp(S.FlagellationPersistBuff) or not S.Flagellation:IsAvailable()) then
+      if Cast(S.ShadowBlades, Settings.Subtlety.OffGCDasOffGCD.ShadowBlades) then return "Cast Shadow Blades Smolderon" end
+    end
+  end
+
+  -- Double Dance Profile
+  -- Short DPS windows so we want to vanish within 5 seconds of the first secret Technique to pull shadow blades and fit a 2nd secret technique cast into the window.
+  -- Double Dance on the pull so the 2nd sec technique in the intermission naturally aligns with CB
+  if S.Vanish:IsReady() then
+    if S.SecretTechnique:TimeSinceLastCast() < 5 and (Player:BuffUp(S.Flagellation) or Player:BuffUp(S.FlagellationPersistBuff))
+      and (S.ShadowBlades:CooldownRemains() <= 30 or S.ShadowBlades:CooldownRemains() >= 90) then
+      ShouldReturn = StealthMacro(S.Vanish, StealthEnergyRequired)
+      if ShouldReturn then return "Vanish Macro Custom Smolderon " .. ShouldReturn end
+    end
+  end
+
+  -- After vanishing redance straight away
+  if S.ShadowDance:IsReady() then
+    if (S.Vanish:TimeSinceLastCast() < 8 or canDance) and S.SymbolsofDeath:IsReady() then
+      ShouldReturn = StealthMacro(S.ShadowDance, StealthEnergyRequired)
+      if ShouldReturn then return "ShadowDance Macro Custom Smolderon " .. ShouldReturn end
+    end
+  end
+
+  -- actions.cds+=/shadow_dance,if=!buff.shadow_dance.up&fight_remains<=8+talent.subterfuge.enabled
+  if HR.CDsON() and S.ShadowDance:IsAvailable() and MayBurnShadowDance() and S.ShadowDance:IsReady() then
+    if not Player:BuffUp(S.ShadowDance) and HL.BossFilteredFightRemains("<=", 8 + 3*num(S.Subterfuge:IsAvailable())) then
+      if Cast(S.ShadowDance) then return "Cast Shadow Dance Smolderon" end
+    end
+  end
+
+  ShouldReturn = PotionsRacialsTrinkets()
+  if ShouldReturn then return ShouldReturn end
 
   return false
 end
@@ -766,7 +1123,7 @@ local function TindralCDs()
   if HR.CDsON() and S.ShurikenTornado:IsAvailable() and S.ShurikenTornado:IsReady() then
     if SnD_Condition() and (S.SymbolsofDeath:IsReady() or Player:BuffUp(S.SymbolsofDeath)) and EffectiveComboPoints <= 2 and not Player:BuffUp(S.Premeditation)
       and (not S.Flagellation:IsAvailable() or S.Flagellation:CooldownRemains() > 20) and MeleeEnemies10yCount >= 3 then
-      if Cast(S.ShurikenTornado, Settings.Subtlety.GCDasOffGCD.ShurikenTornado) then return "Cast Shuriken Tornado" end
+      if Cast(S.ShurikenTornado, Settings.Subtlety.GCDasOffGCD.ShurikenTornado) then return "Cast Shuriken Tornado Tindral" end
     end
   end
 
@@ -785,83 +1142,8 @@ local function TindralCDs()
     end
   end
 
-  -- actions.cds+=/potion,if=buff.bloodlust.react|fight_remains<30|buff.symbols_of_death.up
-  -- &(buff.shadow_blades.up|cooldown.shadow_blades.remains<=10)
-  if Settings.Commons.Enabled.Potions then
-    local PotionSelected = Everyone.PotionSelected()
-    if PotionSelected and PotionSelected:IsReady() and (Player:BloodlustUp() or HL.BossFilteredFightRemains("<", 30) or Player:BuffUp(S.SymbolsofDeath)
-      and (Player:BuffUp(S.ShadowBlades) or S.ShadowBlades:CooldownRemains() <= 10)) then
-      if Cast(PotionSelected, nil, Settings.Commons.DisplayStyle.Potions) then return "Cast Potion Tindral"; end
-    end
-  end
-
-  -- variable,name=racial_sync,value=buff.shadow_blades.up|!talent.shadow_blades&buff.symbols_of_death.up|fight_remains<20
-  local racial_sync = Player:BuffUp(S.ShadowBlades) or not S.ShadowBlades:IsAvailable() and Player:BuffUp(S.SymbolsofDeath) or HL.BossFilteredFightRemains("<", 20)
-
-  -- actions.cds+=/blood_fury,if=variable.racial_sync
-  if S.BloodFury:IsCastable() and racial_sync then
-    if Cast(S.BloodFury, Settings.Commons.OffGCDasOffGCD.Racials) then return "Cast Blood Fury Tindral" end
-  end
-
-  -- actions.cds+=/berserking,if=variable.racial_sync
-  if S.Berserking:IsCastable() and racial_sync then
-    if Cast(S.Berserking, Settings.Commons.OffGCDasOffGCD.Racials) then return "Cast Berserking Tindral" end
-  end
-
-  -- actions.cds+=/fireblood,if=variable.racial_sync
-  if S.Fireblood:IsCastable() and racial_sync then
-    if Cast(S.Fireblood, Settings.Commons.OffGCDasOffGCD.Racials) then return "Cast Fireblood Tindral" end
-  end
-
-  -- actions.cds+=/ancestral_call,if=variable.racial_sync
-  if S.AncestralCall:IsCastable() and racial_sync then
-    if Cast(S.AncestralCall, Settings.Commons.OffGCDasOffGCD.Racials) then return "Cast Ancestral Call Tindral" end
-  end
-
-  -- actions.cds+=/use_item,name=ashes_of_the_embersoul,if=(buff.cold_blood.up|(!talent.danse_macabre&buff.shadow_dance.up
-  -- |buff.danse_macabre.stack>=3)&!talent.cold_blood)|fight_remains<10
-  if Settings.Commons.Enabled.Trinkets then
-    if I.AshesoftheEmbersoul:IsEquippedAndReady() then
-      if canFlag and ((Player:BuffUp(S.ColdBlood) or S.ColdBlood:IsReady()) or (not S.DanseMacabre:IsAvailable() and Player:BuffUp(S.ShadowDance)
-        or Player:BuffStack(S.DanseMacabre) >= 3) and not S.ColdBlood:IsAvailable()) or HL.BossFilteredFightRemains("<", 10) then
-        if Cast(I.AshesoftheEmbersoul, nil, Settings.Commons.DisplayStyle.Trinkets) then return "Ashes of the Embersoul" end
-      end
-    end
-  end
-
-  -- actions.cds+=/use_item,name=witherbarks_branch,if=buff.flagellation_buff.up&talent.invigorating_shadowdust
-  -- |buff.shadow_blades.up|equipped.bandolier_of_twisted_blades&raid_event.adds.up
-  if Settings.Commons.Enabled.Trinkets then
-    if I.WitherbarksBranch:IsEquippedAndReady() then
-      if Player:BuffUp(S.Flagellation) and (S.InvigoratingShadowdust:IsAvailable() or Player:BuffUp(S.ShadowBlades) or I.BandolierOfTwistedBlades:IsEquippedAndReady()) then
-        if Cast(I.WitherbarksBranch, nil, Settings.Commons.DisplayStyle.Trinkets) then return "Witherbark's Branch Tindral" end
-      end
-    end
-  end
-
-  -- actions.cds+=/use_item,name=mirror_of_fractured_tomorrows,if=buff.shadow_dance.up&(target.time_to_die>=15|equipped.ashes_of_the_embersoul)
-  if Settings.Commons.Enabled.Trinkets then
-    if I.Mirror:IsEquippedAndReady() then
-      if Player:BuffUp(S.ShadowDance) and (Target:TimeToDie() >= 15 or I.AshesoftheEmbersoul:IsEquipped()) then
-        if Cast(I.Mirror, nil, Settings.Commons.DisplayStyle.Trinkets) then return "Mirror Of Fractured Tomorrows Tindral" end
-      end
-    end
-  end
-
-  -- actions.cds+=/use_items,if=!stealthed.all&(!trinket.mirror_of_fractured_tomorrows.cooldown.ready|!equipped.mirror_of_fractured_tomorrows)|fight_remains<10
-  -- Default fallback for usable items: Use outside of Stealth/Shadow Dance.
-  if not Player:StealthUp(true, true) and (
-    (not I.Mirror:IsReady() or not I.Mirror:IsEquipped()) and
-      ((I.WitherbarksBranch:IsEquipped() and not I.WitherbarksBranch:IsReady() and not I.AshesoftheEmbersoul:IsEquipped()) or
-        (I.AshesoftheEmbersoul:IsEquipped() and not I.AshesoftheEmbersoul:IsReady() and not I.WitherbarksBranch:IsEquipped()))
-      or HL.BossFilteredFightRemains("<", 10)) then
-    local TrinketToUse = Player:GetUseableItems(OnUseExcludes)
-    if TrinketToUse then
-      if Cast(TrinketToUse, nil, Settings.Commons.DisplayStyle.Trinkets) then
-        return "Generic use_items for Tindral" .. TrinketToUse:Name()
-      end
-    end
-  end
+  ShouldReturn = PotionsRacialsTrinkets()
+  if ShouldReturn then return ShouldReturn end
 
   return false
 end
@@ -884,8 +1166,13 @@ local function FyrakkCDs()
     canDance = canCastTiming(lastColossi, nextColossi, currentFightTime, 30)
   end
 
+  local canShadowBlades = canCastPcnt(70, 90)
+  if canShadowBlades then
+    canShadowBlades = canCastTiming(lastColossi, nextColossi, currentFightTime, 90)
+  end
+
   if HR.CDsON() and S.Flagellation:IsAvailable() and S.Flagellation:IsReady() then
-    if canFlag and S.InvigoratingShadowdust:IsAvailable() and EffectiveComboPoints >= 5 and S.ShadowDance:IsReady() and S.SymbolsofDeath:IsReady() then
+    if canFlag and S.InvigoratingShadowdust:IsAvailable() and EffectiveComboPoints >= 5 and S.ShadowDance:IsReady() and S.SymbolsofDeath:IsReady() and S.ShadowBlades:CooldownRemains() <= 30 then
       if Cast(S.Flagellation, nil, Settings.Commons.DisplayStyle.Signature) then return "Cast Flagellation Fyrakk" end
     end
   end
@@ -897,7 +1184,7 @@ local function FyrakkCDs()
   end
 
   if HR.CDsON() and S.ShadowBlades:IsReady() then
-    if SnD_Condition() and (EffectiveComboPoints <= 1 or Player:HasTier(31, 4))
+    if canShadowBlades and SnD_Condition() and (EffectiveComboPoints <= 1 or Player:HasTier(31, 4))
       and (Player:BuffUp(S.Flagellation) or Player:BuffUp(S.FlagellationPersistBuff) or not S.Flagellation:IsAvailable()) then
       if Cast(S.ShadowBlades, Settings.Subtlety.OffGCDasOffGCD.ShadowBlades) then return "Cast Shadow Blades Fyrakk" end
     end
@@ -947,83 +1234,8 @@ local function FyrakkCDs()
     end
   end
 
-  -- actions.cds+=/potion,if=buff.bloodlust.react|fight_remains<30|buff.symbols_of_death.up
-  -- &(buff.shadow_blades.up|cooldown.shadow_blades.remains<=10)
-  if Settings.Commons.Enabled.Potions then
-    local PotionSelected = Everyone.PotionSelected()
-    if PotionSelected and PotionSelected:IsReady() and (Player:BloodlustUp() or HL.BossFilteredFightRemains("<", 30) or Player:BuffUp(S.SymbolsofDeath)
-      and (Player:BuffUp(S.ShadowBlades) or S.ShadowBlades:CooldownRemains() <= 10)) then
-      if Cast(PotionSelected, nil, Settings.Commons.DisplayStyle.Potions) then return "Cast Potion Fyrakk"; end
-    end
-  end
-
-  -- variable,name=racial_sync,value=buff.shadow_blades.up|!talent.shadow_blades&buff.symbols_of_death.up|fight_remains<20
-  local racial_sync = Player:BuffUp(S.ShadowBlades) or not S.ShadowBlades:IsAvailable() and Player:BuffUp(S.SymbolsofDeath) or HL.BossFilteredFightRemains("<", 20)
-
-  -- actions.cds+=/blood_fury,if=variable.racial_sync
-  if S.BloodFury:IsCastable() and racial_sync then
-    if Cast(S.BloodFury, Settings.Commons.OffGCDasOffGCD.Racials) then return "Cast Blood Fury Fyrakk" end
-  end
-
-  -- actions.cds+=/berserking,if=variable.racial_sync
-  if S.Berserking:IsCastable() and racial_sync then
-    if Cast(S.Berserking, Settings.Commons.OffGCDasOffGCD.Racials) then return "Cast Berserking Fyrakk" end
-  end
-
-  -- actions.cds+=/fireblood,if=variable.racial_sync
-  if S.Fireblood:IsCastable() and racial_sync then
-    if Cast(S.Fireblood, Settings.Commons.OffGCDasOffGCD.Racials) then return "Cast Fireblood Fyrakk" end
-  end
-
-  -- actions.cds+=/ancestral_call,if=variable.racial_sync
-  if S.AncestralCall:IsCastable() and racial_sync then
-    if Cast(S.AncestralCall, Settings.Commons.OffGCDasOffGCD.Racials) then return "Cast Ancestral Call Fyrakk" end
-  end
-
-  -- actions.cds+=/use_item,name=ashes_of_the_embersoul,if=(buff.cold_blood.up|(!talent.danse_macabre&buff.shadow_dance.up
-  -- |buff.danse_macabre.stack>=3)&!talent.cold_blood)|fight_remains<10
-  if Settings.Commons.Enabled.Trinkets then
-    if I.AshesoftheEmbersoul:IsEquippedAndReady() then
-      if canFlag and ((Player:BuffUp(S.ColdBlood) or S.ColdBlood:IsReady()) or (not S.DanseMacabre:IsAvailable() and Player:BuffUp(S.ShadowDance)
-        or Player:BuffStack(S.DanseMacabre) >= 3) and not S.ColdBlood:IsAvailable()) or HL.BossFilteredFightRemains("<", 10) then
-        if Cast(I.AshesoftheEmbersoul, nil, Settings.Commons.DisplayStyle.Trinkets) then return "Ashes of the Embersoul" end
-      end
-    end
-  end
-
-  -- actions.cds+=/use_item,name=witherbarks_branch,if=buff.flagellation_buff.up&talent.invigorating_shadowdust
-  -- |buff.shadow_blades.up|equipped.bandolier_of_twisted_blades&raid_event.adds.up
-  if Settings.Commons.Enabled.Trinkets then
-    if I.WitherbarksBranch:IsEquippedAndReady() then
-      if Player:BuffUp(S.Flagellation) and (S.InvigoratingShadowdust:IsAvailable() or Player:BuffUp(S.ShadowBlades) or I.BandolierOfTwistedBlades:IsEquippedAndReady()) then
-        if Cast(I.WitherbarksBranch, nil, Settings.Commons.DisplayStyle.Trinkets) then return "Witherbark's Branch Fyrakk" end
-      end
-    end
-  end
-
-  -- actions.cds+=/use_item,name=mirror_of_fractured_tomorrows,if=buff.shadow_dance.up&(target.time_to_die>=15|equipped.ashes_of_the_embersoul)
-  if Settings.Commons.Enabled.Trinkets then
-    if I.Mirror:IsEquippedAndReady() then
-      if Player:BuffUp(S.ShadowDance) and (Target:TimeToDie() >= 15 or I.AshesoftheEmbersoul:IsEquipped()) then
-        if Cast(I.Mirror, nil, Settings.Commons.DisplayStyle.Trinkets) then return "Mirror Of Fractured Tomorrows Fyrakk" end
-      end
-    end
-  end
-
-  -- actions.cds+=/use_items,if=!stealthed.all&(!trinket.mirror_of_fractured_tomorrows.cooldown.ready|!equipped.mirror_of_fractured_tomorrows)|fight_remains<10
-  -- Default fallback for usable items: Use outside of Stealth/Shadow Dance.
-  if not Player:StealthUp(true, true) and (
-    (not I.Mirror:IsReady() or not I.Mirror:IsEquipped()) and
-      ((I.WitherbarksBranch:IsEquipped() and not I.WitherbarksBranch:IsReady() and not I.AshesoftheEmbersoul:IsEquipped()) or
-        (I.AshesoftheEmbersoul:IsEquipped() and not I.AshesoftheEmbersoul:IsReady() and not I.WitherbarksBranch:IsEquipped()))
-      or HL.BossFilteredFightRemains("<", 10)) then
-    local TrinketToUse = Player:GetUseableItems(OnUseExcludes)
-    if TrinketToUse then
-      if Cast(TrinketToUse, nil, Settings.Commons.DisplayStyle.Trinkets) then
-        return "Generic use_items for Fyrakk" .. TrinketToUse:Name()
-      end
-    end
-  end
+  ShouldReturn = PotionsRacialsTrinkets()
+  if ShouldReturn then return ShouldReturn end
 
   return false
 end
@@ -1032,6 +1244,47 @@ end
 local function CDs ()
   -- Boss Specific CD profiles
 
+  -- Gnarlroot
+  -- Gnarlroot, Tainted Lasher, Tainted Treant
+  -- if Target:NPCID() == 209333 or Target:NPCID() == 210231 or Target:NPCID() == 211904 then
+  if true then
+    ShouldReturn = GnarlrootCDs()
+    return ShouldReturn
+  end
+
+  -- Igira
+  if Target:NPCID() == 200926 then
+    ShouldReturn = IgiraCDs()
+    return ShouldReturn
+  end
+
+  -- Volcoross
+  if Target:NPCID() == 208478 then
+    ShouldReturn = VolcorossCDs()
+    return ShouldReturn
+  end
+
+  -- Council
+  -- urctos, aerwynn, pip
+  if Target:NPCID() == 208363 or Target:NPCID() == 208365 or Target:NPCID() == 213390 then
+    ShouldReturn = CouncilCDs()
+    return ShouldReturn
+  end
+
+  -- Larodar
+  -- Larodar, Fiery Treant, Scorching Roots
+  if Target:NPCID() == 208445 or Target:NPCID() == 208459 or Target:NPCID() == 208461 then
+    ShouldReturn = LarodarCDs()
+    return ShouldReturn
+  end
+
+  -- Nymue
+  -- Nymue, Manifested Dream, Cycle Warden
+  if Target:NPCID() == 206172 or Target:NPCID() == 213143 or Target:NPCID() == 214075 then
+    ShouldReturn = NymueCDs()
+    return ShouldReturn
+  end
+
   -- Smolderon
   if Target:NPCID() == 200927 then
     ShouldReturn = SmolderonCDs()
@@ -1039,7 +1292,8 @@ local function CDs ()
   end
 
   -- Tindral
-  if Target:NPCID() == 209090 then
+  -- Tindral, Fiery Vines, Scorched Treant
+  if Target:NPCID() == 209090 or Target:NPCID() == 211306 or Target:NPCID() == 214441 then
     ShouldReturn = TindralCDs()
     return ShouldReturn
   end
@@ -1194,7 +1448,7 @@ local function CDs ()
   -- |buff.danse_macabre.stack>=3)&!talent.cold_blood)|fight_remains<10
   if Settings.Commons.Enabled.Trinkets then
     if I.AshesoftheEmbersoul:IsEquippedAndReady() then
-      if ((Player:BuffUp(S.ColdBlood) or S.ColdBlood:IsReady()) or (not S.DanseMacabre:IsAvailable() and Player:BuffUp(S.ShadowDance)
+      if Player:BuffUp(S.Flagellation) and ((Player:BuffUp(S.ColdBlood) or S.ColdBlood:IsReady()) or (not S.DanseMacabre:IsAvailable() and Player:BuffUp(S.ShadowDance)
         or Player:BuffStack(S.DanseMacabre) >= 3) and not S.ColdBlood:IsAvailable()) or HL.BossFilteredFightRemains("<", 10) then
         if Cast(I.AshesoftheEmbersoul, nil, Settings.Commons.DisplayStyle.Trinkets) then return "Ashes of the Embersoul" end
       end
