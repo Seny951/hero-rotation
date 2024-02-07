@@ -1024,7 +1024,8 @@ local function SmolderonCDs()
   canDance = canCastTiming(closestPastTime, closestFutureTime, currentFightTime, 30)
 
   local canShadowBlades = false
-  canShadowBlades = canCastTiming(closestPastTime,closestFutureTime, currentFightTime, 90)
+  -- 70 seconds to allow for the entire duration of dmg amp as Blades won't be used immediately
+  canShadowBlades = canCastTiming(closestPastTime,closestFutureTime, currentFightTime, 70)
 
   if HR.CDsON() and S.Flagellation:IsAvailable() and S.Flagellation:IsReady() then
     if canFlag and S.InvigoratingShadowdust:IsAvailable() and EffectiveComboPoints >= 5 and S.ShadowDance:IsReady() and S.SymbolsofDeath:IsReady() and S.ShadowBlades:CooldownRemains() <= 30 then
