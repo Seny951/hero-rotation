@@ -588,20 +588,10 @@ local function SmolderonCDs()
   local closestPastTime, closestFutureTime = findClosestTimes(WorldInFlamesTimings, currentFightTime)
 
   local canFlag = false
-  if closestPastTime and closestFutureTime then
-    local timeUntilNextTiming = closestFutureTime - currentFightTime
-    if timeUntilNextTiming == 0 or currentFightTime > closestPastTime and timeUntilNextTiming > 60 then
-      canFlag = true
-    end
-  end
+  canFlag = canCastTiming(closestPastTime, closestFutureTime, currentFightTime, 60)
 
   local canDance = false
-  if closestPastTime and closestFutureTime then
-    local timeUntilNextTiming = closestFutureTime - currentFightTime
-    if currentFightTime > closestPastTime and timeUntilNextTiming >= 30 then
-      canDance = true
-    end
-  end
+  canDance = canCastTiming(closestPastTime, closestFutureTime, closestPastTime, 30)
 
   if HR.CDsON() and S.Flagellation:IsAvailable() and S.Flagellation:IsReady() then
     if canFlag and S.InvigoratingShadowdust:IsAvailable() and EffectiveComboPoints >= 5 and S.ShadowDance:IsReady() and S.SymbolsofDeath:IsReady() then
@@ -736,15 +726,10 @@ local function TindralCDs()
   local supernova = {0, 127, 262}
   local incarnOwl = {82, 230}
   local currentFightTime = HL.CombatTime()
-  local nextsupernova = findClosestFutureTime(supernova, currentFightTime)
+  local lastSupernova, nextSupernova = findClosestTimes(supernova, currentFightTime)
 
   local canFlag = false
-  local timeUntilNextSupernova = nextsupernova - currentFightTime
-  for _, time in ipairs(supernova) do
-    if nextsupernova == currentFightTime or math.abs(currentFightTime - time) <= 5 or timeUntilNextSupernova >= 60 then
-      canFlag = true
-    end
-  end
+  canFlag = canCastTiming(lastSupernova, nextSupernova, currentFightTime, 60)
 
   if HR.CDsON() and S.Flagellation:IsAvailable() and S.Flagellation:IsReady() then
     if canFlag and S.InvigoratingShadowdust:IsAvailable() and EffectiveComboPoints >= 5 and S.ShadowDance:IsReady() and S.SymbolsofDeath:IsReady() then
