@@ -1089,6 +1089,9 @@ local function TindralCDs()
   local canFlag = false
   canFlag = canCastTiming(lastSupernova, nextSupernova, currentFightTime, 60)
 
+  local canShadowBlades = false
+  canShadowBlades = canCastTiming(lastSupernova, nextSupernova, currentFightTime, 90)
+
   if HR.CDsON() and S.Flagellation:IsAvailable() and S.Flagellation:IsReady() then
     if canFlag and S.InvigoratingShadowdust:IsAvailable() and EffectiveComboPoints >= 5 and S.ShadowDance:IsReady() and S.SymbolsofDeath:IsReady() then
       if Cast(S.Flagellation, nil, Settings.Commons.DisplayStyle.Signature) then return "Cast Flagellation Tindral" end
@@ -1102,7 +1105,7 @@ local function TindralCDs()
   end
 
   if HR.CDsON() and S.ShadowBlades:IsReady() then
-    if SnD_Condition() and (EffectiveComboPoints <= 1 or Player:HasTier(31, 4))
+    if canShadowBlades and SnD_Condition() and (EffectiveComboPoints <= 1 or Player:HasTier(31, 4))
       and (Player:BuffUp(S.Flagellation) or Player:BuffUp(S.FlagellationPersistBuff) or not S.Flagellation:IsAvailable()) then
       if Cast(S.ShadowBlades, Settings.Subtlety.OffGCDasOffGCD.ShadowBlades) then return "Cast Shadow Blades Tindral" end
     end
