@@ -175,32 +175,6 @@ local function SuggestCycleDoT(DoTSpell, DoTEvaluation, DoTMinTTD, Enemies)
   end
 end
 
-function findClosestTimes(timings, currentTime)
-  local closestPastTime = findClosestPastTime(timings, currentTime)
-  local closestFutureTime = findClosestFutureTime(timings, currentTime)
-  return closestPastTime, closestFutureTime
-end
-
-function findClosestPastTime(timings, currentTime)
-  local closestPastTime = 0
-  for _, time in ipairs(timings) do
-    if time <= currentTime and time >= closestPastTime then
-      closestPastTime = time
-    end
-  end
-  return closestPastTime
-end
-
-function findClosestFutureTime(timings, currentTime)
-  local closestFutureTime = currentTime
-  for _, time in ipairs(timings) do
-    if time >= currentTime and (closestFutureTime == currentTime or time <= closestFutureTime) then
-      closestFutureTime = time
-    end
-  end
-  return closestFutureTime
-end
-
 -- APL Action Lists (and Variables)
 local function Stealth_Threshold ()
   -- actions+=/ variable,name=stealth_threshold,value=20+talent.vigor.rank*25+talent.thistle_tea*20+talent.shadowcraft*20
@@ -262,19 +236,49 @@ local function Trinket_Condition()
     and I.WitherbarksBranch:CooldownRemains() <= 8 or I.BandolierOfTwistedBlades:IsEquipped() or S.InvigoratingShadowdust:IsAvailable())
 end
 
+function findClosestTimes(timings, currentTime)
+  local closestPastTime = findClosestPastTime(timings, currentTime)
+  local closestFutureTime = findClosestFutureTime(timings, currentTime)
+  return closestPastTime, closestFutureTime
+end
+
+function findClosestPastTime(timings, currentTime)
+  local closestPastTime = 0
+  for _, time in ipairs(timings) do
+    if time <= currentTime and time >= closestPastTime then
+      closestPastTime = time
+    end
+  end
+  return closestPastTime
+end
+
+function findClosestFutureTime(timings, currentTime)
+  local closestFutureTime = currentTime
+  for _, time in ipairs(timings) do
+    if time >= currentTime and (closestFutureTime == currentTime or time <= closestFutureTime) then
+      closestFutureTime = time
+    end
+  end
+  return closestFutureTime
+end
+
 local function canCastPcnt(percent, holdWindow)
-  local canFlag = false
-  if Target:TimeToX(percent) >= holdWindow then
-    canFlag = true
+  local canFlag = true
+  if Target:TimeToX(percent) <= holdWindow then
+    canFlag = false
   end
   return canFlag
 end
 
 local function canCastTiming(lastTime, nextTime, currentFightTime, holdWindow)
-  local canCast = false
-  local timeUntilNextTiming = nextTime - currentFightTime
-  if timeUntilNextTiming == 0 or currentFightTime > lastTime and timeUntilNextTiming >= holdWindow then
-    canCast = true
+  local canCast = true
+  local timeUntilNextTiming = 0
+
+  if nextTime ~= 0 then
+    timeUntilNextTiming = nextTime - currentFightTime
+  end
+  if timeUntilNextTiming == 0 or currentFightTime > lastTime and timeUntilNextTiming <= holdWindow then
+    canCast = false
   end
   return canCast
 end
