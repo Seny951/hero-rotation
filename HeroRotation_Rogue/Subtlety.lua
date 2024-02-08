@@ -273,7 +273,6 @@ end
 local function canCastTiming(lastTime, nextTime, currentFightTime, holdWindow)
   local canCast = true
   local timeUntilNextTiming = 0
-
   if nextTime ~= 0 then
     timeUntilNextTiming = nextTime - currentFightTime
   end
@@ -671,14 +670,9 @@ local function GnarlrootCDs()
   local currentFightTime = HL.CombatTime()
   local closestPastTime, closestFutureTime = findClosestTimes(UprootedAgony, currentFightTime)
 
-  local canFlag = false
-  canFlag = canCastTiming(closestPastTime, closestFutureTime, currentFightTime, 60)
-
-  local canDance = false
-  canDance = canCastTiming(closestPastTime, closestFutureTime, currentFightTime, 30)
-
-  local canShadowBlades = false
-  canShadowBlades = canCastTiming(closestPastTime, closestFutureTime, currentFightTime, 90)
+  local canFlag = canCastTiming(closestPastTime, closestFutureTime, currentFightTime, 60)
+  local canDance = canCastTiming(closestPastTime, closestFutureTime, currentFightTime, 30)
+  local canShadowBlades = canCastTiming(closestPastTime, closestFutureTime, currentFightTime, 90)
 
   if HR.CDsON() and S.Flagellation:IsAvailable() and S.Flagellation:IsReady() then
     if canFlag and S.InvigoratingShadowdust:IsAvailable() and EffectiveComboPoints >= 5 and S.ShadowDance:IsReady() and S.SymbolsofDeath:IsReady() then
@@ -1021,15 +1015,11 @@ local function SmolderonCDs()
   local currentFightTime = HL.CombatTime()
   local closestPastTime, closestFutureTime = findClosestTimes(WorldInFlamesTimings, currentFightTime)
 
-  local canFlag = false
-  canFlag = canCastTiming(closestPastTime, closestFutureTime, currentFightTime, 60)
+  local canFlag = canCastTiming(closestPastTime, closestFutureTime, currentFightTime, 60)
+  local canDance = canCastTiming(closestPastTime, closestFutureTime, currentFightTime, 30)
 
-  local canDance = false
-  canDance = canCastTiming(closestPastTime, closestFutureTime, currentFightTime, 30)
-
-  local canShadowBlades = false
   -- 70 seconds to allow for the entire duration of dmg amp (-20) as Blades won't be used immediately
-  canShadowBlades = canCastTiming(closestPastTime,closestFutureTime, currentFightTime, 70)
+  local canShadowBlades = canCastTiming(closestPastTime,closestFutureTime, currentFightTime, 70)
 
   if HR.CDsON() and S.Flagellation:IsAvailable() and S.Flagellation:IsReady() then
     if canFlag and S.InvigoratingShadowdust:IsAvailable() and EffectiveComboPoints >= 5 and S.ShadowDance:IsReady() and S.SymbolsofDeath:IsReady() and S.ShadowBlades:CooldownRemains() <= 30 then
@@ -1090,11 +1080,8 @@ local function TindralCDs()
   local currentFightTime = HL.CombatTime()
   local lastSupernova, nextSupernova = findClosestTimes(supernova, currentFightTime)
 
-  local canFlag = false
-  canFlag = canCastTiming(lastSupernova, nextSupernova, currentFightTime, 60)
-
-  local canShadowBlades = false
-  canShadowBlades = canCastTiming(lastSupernova, nextSupernova, currentFightTime, 90)
+  local canFlag = canCastTiming(lastSupernova, nextSupernova, currentFightTime, 60)
+  local canShadowBlades = canCastTiming(lastSupernova, nextSupernova, currentFightTime, 90)
 
   if HR.CDsON() and S.Flagellation:IsAvailable() and S.Flagellation:IsReady() then
     if canFlag and S.InvigoratingShadowdust:IsAvailable() and EffectiveComboPoints >= 5 and S.ShadowDance:IsReady() and S.SymbolsofDeath:IsReady() then
