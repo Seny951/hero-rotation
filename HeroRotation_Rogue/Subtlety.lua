@@ -1280,8 +1280,7 @@ local function CDs ()
   end
 
   -- Smolderon
-  --if Target:NPCID() == 200927 then
-  if true then
+  if Target:NPCID() == 200927 then
     ShouldReturn = SmolderonCDs()
     return ShouldReturn
   end
