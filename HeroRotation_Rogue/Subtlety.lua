@@ -276,7 +276,7 @@ local function canCastTiming(lastTime, nextTime, currentFightTime, holdWindow)
   if nextTime ~= 0 then
     timeUntilNextTiming = nextTime - currentFightTime
   end
-  if currentFightTime > lastTime and timeUntilNextTiming <= holdWindow then
+  if timeUntilNextTiming ~= 0 and currentFightTime > lastTime and timeUntilNextTiming <= holdWindow then
     canCast = false
   end
   return canCast
