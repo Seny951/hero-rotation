@@ -276,7 +276,7 @@ local function canCastTiming(lastTime, nextTime, currentFightTime, holdWindow)
   if nextTime ~= 0 then
     timeUntilNextTiming = nextTime - currentFightTime
   end
-  if timeUntilNextTiming == 0 or currentFightTime > lastTime and timeUntilNextTiming <= holdWindow then
+  if currentFightTime > lastTime and timeUntilNextTiming <= holdWindow then
     canCast = false
   end
   return canCast
@@ -1280,7 +1280,8 @@ local function CDs ()
   end
 
   -- Smolderon
-  if Target:NPCID() == 200927 then
+  --if Target:NPCID() == 200927 then
+  if true then
     ShouldReturn = SmolderonCDs()
     return ShouldReturn
   end
