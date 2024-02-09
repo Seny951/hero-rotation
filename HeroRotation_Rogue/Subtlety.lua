@@ -666,7 +666,7 @@ end
 
 -- # Cooldown Usage for Gnarlroot
 local function GnarlrootCDs()
-  local UprootedAgony = {0, 120, 270}
+  local UprootedAgony = {0, 126, 270}
   local currentFightTime = HL.CombatTime()
   local closestPastTime, closestFutureTime = findClosestTimes(UprootedAgony, currentFightTime)
 
