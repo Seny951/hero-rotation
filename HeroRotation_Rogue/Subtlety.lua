@@ -45,6 +45,7 @@ local OnUseExcludes = {
   I.Mirror:ID(),
   I.WitherbarksBranch:ID(),
   I.AshesoftheEmbersoul:ID(),
+  I.PersonalSpaceAmplifier:ID()
 }
 
 -- Rotation Var
