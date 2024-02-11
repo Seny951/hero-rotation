@@ -291,13 +291,14 @@ Item.Rogue.Outlaw = {
 
 Item.Rogue.Subtlety = {
   -- Trinkets
-  ManicGrieftorch         = Item(194308, {13, 14}),
-  StormEatersBoon         = Item(194302, {13, 14}),
-  BeaconToTheBeyond       = Item(203963, {13, 14}),
-  AshesoftheEmbersoul     = Item(207167, {13, 14}),
-  WitherbarksBranch       = Item(109999, {13, 14}),
+  ManicGrieftorch          = Item(194308, {13, 14}),
+  StormEatersBoon          = Item(194302, {13, 14}),
+  BeaconToTheBeyond        = Item(203963, {13, 14}),
+  AshesoftheEmbersoul      = Item(207167, {13, 14}),
+  WitherbarksBranch        = Item(109999, {13, 14}),
   BandolierOfTwistedBlades = Item(207165, {13, 14}),
-  Mirror                  = Item(207581, {13, 14})
+  Mirror                   = Item(207581, {13, 14}),
+  PersonalSpaceAmplifier   = Item(159341,{6})
 }
 
 function Commons.StealthSpell()
