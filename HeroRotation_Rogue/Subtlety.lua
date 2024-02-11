@@ -584,17 +584,7 @@ local function StealthMacro (StealthSpell, EnergyThreshold)
   return false
 end
 
-local function PotionsRacialsTrinkets()
-  -- actions.cds+=/potion,if=buff.bloodlust.react|fight_remains<30|buff.symbols_of_death.up
-  -- &(buff.shadow_blades.up|cooldown.shadow_blades.remains<=10)
-  if Settings.Commons.Enabled.Potions then
-    local PotionSelected = Everyone.PotionSelected()
-    if PotionSelected and PotionSelected:IsReady() and (Player:BloodlustUp() or HL.BossFilteredFightRemains("<", 30) or Player:BuffUp(S.SymbolsofDeath)
-      and (Player:BuffUp(S.ShadowBlades) or S.ShadowBlades:CooldownRemains() <= 10)) then
-      if Cast(PotionSelected, nil, Settings.Commons.DisplayStyle.Potions) then return "Cast Potion"; end
-    end
-  end
-
+local function RacialsTrinkets()
   -- variable,name=racial_sync,value=buff.shadow_blades.up|!talent.shadow_blades&buff.symbols_of_death.up|fight_remains<20
   local racial_sync = Player:BuffUp(S.ShadowBlades) or not S.ShadowBlades:IsAvailable() and Player:BuffUp(S.SymbolsofDeath) or HL.BossFilteredFightRemains("<", 20)
 
@@ -729,7 +719,17 @@ local function GnarlrootCDs()
     end
   end
 
-  ShouldReturn = PotionsRacialsTrinkets()
+  -- actions.cds+=/potion,if=buff.bloodlust.react|fight_remains<30|buff.symbols_of_death.up
+  -- &(buff.shadow_blades.up|cooldown.shadow_blades.remains<=10)
+  if Settings.Commons.Enabled.Potions then
+    local PotionSelected = Everyone.PotionSelected()
+    if PotionSelected and PotionSelected:IsReady() and (Player:BloodlustUp() or HL.BossFilteredFightRemains("<", 30) or Player:BuffUp(S.SymbolsofDeath)
+      and (Player:BuffUp(S.ShadowBlades) or S.ShadowBlades:CooldownRemains() <= 10)) then
+      if Cast(PotionSelected, nil, Settings.Commons.DisplayStyle.Potions) then return "Cast Potion"; end
+    end
+  end
+
+  ShouldReturn = RacialsTrinkets()
   if ShouldReturn then return ShouldReturn end
 
   return false
@@ -793,7 +793,17 @@ local function IgiraCDs()
     end
   end
 
-  ShouldReturn = PotionsRacialsTrinkets()
+  -- actions.cds+=/potion,if=buff.bloodlust.react|fight_remains<30|buff.symbols_of_death.up
+  -- &(buff.shadow_blades.up|cooldown.shadow_blades.remains<=10)
+  if Settings.Commons.Enabled.Potions then
+    local PotionSelected = Everyone.PotionSelected()
+    if PotionSelected and PotionSelected:IsReady() and (Player:BloodlustUp() or HL.BossFilteredFightRemains("<", 30) or Player:BuffUp(S.SymbolsofDeath)
+      and (Player:BuffUp(S.ShadowBlades) or S.ShadowBlades:CooldownRemains() <= 10)) then
+      if Cast(PotionSelected, nil, Settings.Commons.DisplayStyle.Potions) then return "Cast Potion"; end
+    end
+  end
+
+  ShouldReturn = RacialsTrinkets()
   if ShouldReturn then return ShouldReturn end
 
   return false
@@ -846,7 +856,17 @@ local function VolcorossCDs()
     end
   end
 
-  ShouldReturn = PotionsRacialsTrinkets()
+  -- actions.cds+=/potion,if=buff.bloodlust.react|fight_remains<30|buff.symbols_of_death.up
+  -- &(buff.shadow_blades.up|cooldown.shadow_blades.remains<=10)
+  if Settings.Commons.Enabled.Potions then
+    local PotionSelected = Everyone.PotionSelected()
+    if PotionSelected and PotionSelected:IsReady() and (Player:BloodlustUp() or HL.BossFilteredFightRemains("<", 30) or Player:BuffUp(S.SymbolsofDeath)
+      and (Player:BuffUp(S.ShadowBlades) or S.ShadowBlades:CooldownRemains() <= 10)) then
+      if Cast(PotionSelected, nil, Settings.Commons.DisplayStyle.Potions) then return "Cast Potion"; end
+    end
+  end
+
+  ShouldReturn = RacialsTrinkets()
   if ShouldReturn then return ShouldReturn end
 
   return false
@@ -897,7 +917,17 @@ local function CouncilCDs()
     end
   end
 
-  ShouldReturn = PotionsRacialsTrinkets()
+  -- actions.cds+=/potion,if=buff.bloodlust.react|fight_remains<30|buff.symbols_of_death.up
+  -- &(buff.shadow_blades.up|cooldown.shadow_blades.remains<=10)
+  if Settings.Commons.Enabled.Potions then
+    local PotionSelected = Everyone.PotionSelected()
+    if PotionSelected and PotionSelected:IsReady() and (Player:BloodlustUp() or HL.BossFilteredFightRemains("<", 30) or Player:BuffUp(S.SymbolsofDeath)
+      and (Player:BuffUp(S.ShadowBlades) or S.ShadowBlades:CooldownRemains() <= 10)) then
+      if Cast(PotionSelected, nil, Settings.Commons.DisplayStyle.Potions) then return "Cast Potion"; end
+    end
+  end
+
+  ShouldReturn = RacialsTrinkets()
   if ShouldReturn then return ShouldReturn end
 
   return false
@@ -950,7 +980,17 @@ local function LarodarCDs()
     end
   end
 
-  ShouldReturn = PotionsRacialsTrinkets()
+  -- actions.cds+=/potion,if=buff.bloodlust.react|fight_remains<30|buff.symbols_of_death.up
+  -- &(buff.shadow_blades.up|cooldown.shadow_blades.remains<=10)
+  if Settings.Commons.Enabled.Potions then
+    local PotionSelected = Everyone.PotionSelected()
+    if PotionSelected and PotionSelected:IsReady() and (Player:BloodlustUp() or HL.BossFilteredFightRemains("<", 30) or Player:BuffUp(S.SymbolsofDeath)
+      and (Player:BuffUp(S.ShadowBlades) or S.ShadowBlades:CooldownRemains() <= 10)) then
+      if Cast(PotionSelected, nil, Settings.Commons.DisplayStyle.Potions) then return "Cast Potion"; end
+    end
+  end
+
+  ShouldReturn = RacialsTrinkets()
   if ShouldReturn then return ShouldReturn end
 
   return false
@@ -1003,7 +1043,17 @@ local function NymueCDs()
     end
   end
 
-  ShouldReturn = PotionsRacialsTrinkets()
+  -- actions.cds+=/potion,if=buff.bloodlust.react|fight_remains<30|buff.symbols_of_death.up
+  -- &(buff.shadow_blades.up|cooldown.shadow_blades.remains<=10)
+  if Settings.Commons.Enabled.Potions then
+    local PotionSelected = Everyone.PotionSelected()
+    if PotionSelected and PotionSelected:IsReady() and (Player:BloodlustUp() or HL.BossFilteredFightRemains("<", 30) or Player:BuffUp(S.SymbolsofDeath)
+      and (Player:BuffUp(S.ShadowBlades) or S.ShadowBlades:CooldownRemains() <= 10)) then
+      if Cast(PotionSelected, nil, Settings.Commons.DisplayStyle.Potions) then return "Cast Potion"; end
+    end
+  end
+
+  ShouldReturn = RacialsTrinkets()
   if ShouldReturn then return ShouldReturn end
 
   return false
@@ -1017,6 +1067,9 @@ local function SmolderonCDs()
 
   local canFlag = canCastTiming(closestPastTime, closestFutureTime, currentFightTime, 60)
   local canDance = canCastTiming(closestPastTime, closestFutureTime, currentFightTime, 30)
+
+  -- pot first and last intermission
+  local canPot = currentFightTime > WorldInFlamesTimings[2] or currentFightTime > WorldInFlamesTimings[5]
 
   -- 70 seconds to allow for the entire duration of dmg amp (-20) as Blades won't be used immediately
   local canShadowBlades = canCastTiming(closestPastTime,closestFutureTime, currentFightTime, 70)
@@ -1066,7 +1119,17 @@ local function SmolderonCDs()
     end
   end
 
-  ShouldReturn = PotionsRacialsTrinkets()
+  -- actions.cds+=/potion,if=buff.bloodlust.react|fight_remains<30|buff.symbols_of_death.up
+  -- &(buff.shadow_blades.up|cooldown.shadow_blades.remains<=10)
+  if Settings.Commons.Enabled.Potions then
+    local PotionSelected = Everyone.PotionSelected()
+    if PotionSelected and PotionSelected:IsReady() and canPot and (Player:BloodlustUp() or HL.BossFilteredFightRemains("<", 30) or Player:BuffUp(S.SymbolsofDeath)
+      and (Player:BuffUp(S.ShadowBlades) or S.ShadowBlades:CooldownRemains() <= 10)) then
+      if Cast(PotionSelected, nil, Settings.Commons.DisplayStyle.Potions) then return "Cast Potion Smolderon"; end
+    end
+  end
+
+  ShouldReturn = RacialsTrinkets()
   if ShouldReturn then return ShouldReturn end
 
   return false
@@ -1137,7 +1200,17 @@ local function TindralCDs()
     end
   end
 
-  ShouldReturn = PotionsRacialsTrinkets()
+  -- actions.cds+=/potion,if=buff.bloodlust.react|fight_remains<30|buff.symbols_of_death.up
+  -- &(buff.shadow_blades.up|cooldown.shadow_blades.remains<=10)
+  if Settings.Commons.Enabled.Potions then
+    local PotionSelected = Everyone.PotionSelected()
+    if PotionSelected and PotionSelected:IsReady() and (Player:BloodlustUp() or HL.BossFilteredFightRemains("<", 30) or Player:BuffUp(S.SymbolsofDeath)
+      and (Player:BuffUp(S.ShadowBlades) or S.ShadowBlades:CooldownRemains() <= 10)) then
+      if Cast(PotionSelected, nil, Settings.Commons.DisplayStyle.Potions) then return "Cast Potion"; end
+    end
+  end
+
+  ShouldReturn = RacialsTrinkets()
   if ShouldReturn then return ShouldReturn end
 
   return false
@@ -1229,7 +1302,17 @@ local function FyrakkCDs()
     end
   end
 
-  ShouldReturn = PotionsRacialsTrinkets()
+  -- actions.cds+=/potion,if=buff.bloodlust.react|fight_remains<30|buff.symbols_of_death.up
+  -- &(buff.shadow_blades.up|cooldown.shadow_blades.remains<=10)
+  if Settings.Commons.Enabled.Potions then
+    local PotionSelected = Everyone.PotionSelected()
+    if PotionSelected and PotionSelected:IsReady() and (Player:BloodlustUp() or HL.BossFilteredFightRemains("<", 30) or Player:BuffUp(S.SymbolsofDeath)
+      and (Player:BuffUp(S.ShadowBlades) or S.ShadowBlades:CooldownRemains() <= 10)) then
+      if Cast(PotionSelected, nil, Settings.Commons.DisplayStyle.Potions) then return "Cast Potion"; end
+    end
+  end
+
+  ShouldReturn = RacialsTrinkets()
   if ShouldReturn then return ShouldReturn end
 
   return false
