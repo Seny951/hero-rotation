@@ -612,7 +612,7 @@ local function RacialsTrinkets()
   -- |buff.danse_macabre.stack>=3)&!talent.cold_blood)|fight_remains<10
   if Settings.Commons.Enabled.Trinkets then
     if I.AshesoftheEmbersoul:IsEquippedAndReady() then
-      if ((Player:BuffUp(S.ColdBlood) or S.ColdBlood:IsReady()) or (not S.DanseMacabre:IsAvailable() and Player:BuffUp(S.ShadowDance)
+      if Player:BuffUp(S.Flagellation) or Player:BuffUp(S.FlagellationPersistBuff) and ((Player:BuffUp(S.ColdBlood) or S.ColdBlood:IsReady()) or (not S.DanseMacabre:IsAvailable() and Player:BuffUp(S.ShadowDance)
         or Player:BuffStack(S.DanseMacabre) >= 3) and not S.ColdBlood:IsAvailable()) or HL.BossFilteredFightRemains("<", 10) then
         if Cast(I.AshesoftheEmbersoul, nil, Settings.Commons.DisplayStyle.Trinkets) then return "Ashes of the Embersoul" end
       end
@@ -830,11 +830,8 @@ local function VolcorossCDs()
     end
   end
 
-  -- Double Dance Profile
-  -- Short DPS windows so we want to vanish within 5 seconds of the first secret Technique to pull shadow blades and fit a 2nd secret technique cast into the window.
-  -- Double Dance on the pull so the 2nd sec technique in the intermission naturally aligns with CB
   if S.Vanish:IsReady() then
-    if S.SecretTechnique:TimeSinceLastCast() < 5 and (Player:BuffUp(S.Flagellation) or Player:BuffUp(S.FlagellationPersistBuff))
+    if not Player:StealthUp(true, true) and S.SecretTechnique:TimeSinceLastCast() < 8 and (Player:BuffUp(S.Flagellation) or Player:BuffUp(S.FlagellationPersistBuff))
       and (S.ShadowBlades:CooldownRemains() <= 30 or S.ShadowBlades:CooldownRemains() >= 90) then
       ShouldReturn = StealthMacro(S.Vanish, StealthEnergyRequired)
       if ShouldReturn then return "Vanish Macro Custom Volcoross " .. ShouldReturn end
@@ -843,7 +840,8 @@ local function VolcorossCDs()
 
   -- After vanishing redance as soon as subterfuge ends and symbols is ready or already up
   if S.ShadowDance:IsReady() then
-    if not Player:StealthUp(true, true) and (S.SymbolsofDeath:IsReady() or (Player:BuffUp(S.SymbolsofDeath) and Player:BuffRemains(S.SymbolsofDeath) >= 8)) then
+    if not Player:StealthUp(true, true) and (S.SymbolsofDeath:IsReady() or (Player:BuffUp(S.SymbolsofDeath) and Player:BuffRemains(S.SymbolsofDeath) >= 8))
+      and S.Flagellation:CooldownRemains() >= 25 or S.ShadowBlades:CooldownRemains() >= 45 or S.ShadowDance:Charges() >= 2 then
       ShouldReturn = StealthMacro(S.ShadowDance, StealthEnergyRequired)
       if ShouldReturn then return "ShadowDance Macro Custom Volcoross " .. ShouldReturn end
     end
@@ -1524,7 +1522,7 @@ local function CDs ()
   -- |buff.danse_macabre.stack>=3)&!talent.cold_blood)|fight_remains<10
   if Settings.Commons.Enabled.Trinkets then
     if I.AshesoftheEmbersoul:IsEquippedAndReady() then
-      if ((Player:BuffUp(S.ColdBlood) or S.ColdBlood:IsReady()) or (not S.DanseMacabre:IsAvailable() and Player:BuffUp(S.ShadowDance)
+      if Player:BuffUp(S.Flagellation) or Player:BuffUp(S.FlagellationPersistBuff) and ((Player:BuffUp(S.ColdBlood) or S.ColdBlood:IsReady()) or (not S.DanseMacabre:IsAvailable() and Player:BuffUp(S.ShadowDance)
         or Player:BuffStack(S.DanseMacabre) >= 3) and not S.ColdBlood:IsAvailable()) or HL.BossFilteredFightRemains("<", 10) then
         if Cast(I.AshesoftheEmbersoul, nil, Settings.Commons.DisplayStyle.Trinkets) then return "Ashes of the Embersoul" end
       end
