@@ -359,7 +359,7 @@ local function Finish (ReturnSpellOnly, StealthSpell)
   -- actions.finish+=/cold_blood,if=variable.secret_condition&cooldown.secret_technique.ready
   -- Seny Only Add cold blood to sec tech when shadow blades is either up or isn't in range to be pulled by vanish for double dance windows where we want to CB on the 2nd cast
   if S.ColdBlood:IsReady() and Secret_Condition(ShadowDanceBuff, PremeditationBuff) and S.SecretTechnique:IsReady() and
-    (S.ShadowBlades:CooldownRemains() >= 30 or Player:BuffUp(S.ShadowBlades)) then
+    (S.ShadowBlades:CooldownRemains() >= 30 or Player:BuffUp(S.ShadowBlades) or S.ShadowBlades:IsReady()) then
     if Settings.Commons.OffGCDasOffGCD.ColdBlood then
       Cast(S.ColdBlood, Settings.Commons.OffGCDasOffGCD.ColdBlood)
     else
@@ -1102,9 +1102,9 @@ local function SmolderonCDs()
     end
   end
 
-  -- After vanishing redance straight away
+  -- After vanishing redance straight away except on the pull
   if S.ShadowDance:IsReady() then
-    if (S.Vanish:TimeSinceLastCast() < 8 or canDance and not Player:StealthUp(true, true)) and S.SymbolsofDeath:IsReady() then
+    if currentFightTime > 60 and ((S.Vanish:TimeSinceLastCast() < 8 or canDance)) and S.SymbolsofDeath:IsReady() then
       ShouldReturn = StealthMacro(S.ShadowDance, StealthEnergyRequired)
       if ShouldReturn then return "ShadowDance Macro Custom Smolderon " .. ShouldReturn end
     end
@@ -1144,13 +1144,13 @@ local function TindralCDs()
   local canShadowBlades = canCastTiming(lastSupernova, nextSupernova, currentFightTime, 120-(30*S.Vanish:Charges()))
 
   if HR.CDsON() and S.Flagellation:IsAvailable() and S.Flagellation:IsReady() then
-    if canFlag and S.InvigoratingShadowdust:IsAvailable() and EffectiveComboPoints >= 5 and S.ShadowDance:IsReady() and S.SymbolsofDeath:IsReady() then
+    if canFlag and S.InvigoratingShadowdust:IsAvailable() and EffectiveComboPoints >= 5 and S.ShadowDance:IsReady() then
       if Cast(S.Flagellation, nil, Settings.Commons.DisplayStyle.Signature) then return "Cast Flagellation Tindral" end
     end
   end
 
   if HR.CDsON() and S.SymbolsofDeath:IsReady()  then
-    if SnD_Condition() and S.ShadowDance:IsReady() and not Player:StealthUp(true, true) then
+    if SnD_Condition() and S.ShadowDance:IsReady() then
       if Cast(S.SymbolsofDeath, Settings.Subtlety.OffGCDasOffGCD.SymbolsofDeath) then return "Cast Symbols of Death Tindral" end
     end
   end
@@ -1177,14 +1177,16 @@ local function TindralCDs()
   -- Standard APL tornado suggestion (only on roots), Cant know which roots each person is assigned to so suggest it as standard on all roots if its up
   if HR.CDsON() and S.ShurikenTornado:IsAvailable() and S.ShurikenTornado:IsReady() then
     if SnD_Condition() and (S.SymbolsofDeath:IsReady() or Player:BuffUp(S.SymbolsofDeath)) and EffectiveComboPoints <= 2 and not Player:BuffUp(S.Premeditation)
-      and (not S.Flagellation:IsAvailable() or S.Flagellation:CooldownRemains() > 20) and MeleeEnemies10yCount >= 3 then
+      and (not S.Flagellation:IsAvailable() or S.Flagellation:CooldownRemains() > 20) and MeleeEnemies10yCount >= 3 and S.ShadowDance:IsReady() then
       if Cast(S.ShurikenTornado, Settings.Subtlety.GCDasOffGCD.ShurikenTornado) then return "Cast Shuriken Tornado Tindral" end
     end
   end
 
   -- After vanishing redance as soon as subterfuge ends and symbols is ready or already up
+  -- sync dance to flag when squeezing in the 2nd use in pull
   if S.ShadowDance:IsReady() then
-    if not Player:StealthUp(true, true) and (S.SymbolsofDeath:IsReady() or (Player:BuffUp(S.SymbolsofDeath) and Player:BuffRemains(S.SymbolsofDeath) >= 8)) then
+    if not Player:StealthUp(true, true) and (S.SymbolsofDeath:IsReady() or (Player:BuffUp(S.SymbolsofDeath) and Player:BuffRemains(S.SymbolsofDeath) >= 8))
+      and Player:BuffUp(S.Flagellation) or S.Flagellation:CooldownRemains() >= 25 or S.ShadowBlades:CooldownRemains() >= 45 or S.ShadowDance:Charges() >= 2 then
       ShouldReturn = StealthMacro(S.ShadowDance, StealthEnergyRequired)
       if ShouldReturn then return "ShadowDance Macro Custom Tindral " .. ShouldReturn end
     end
@@ -1367,7 +1369,8 @@ local function CDs ()
 
   -- Tindral
   -- Tindral, Fiery Vines, Scorched Treant
-  if Target:NPCID() == 209090 or Target:NPCID() == 211306 or Target:NPCID() == 214441 then
+  --if Target:NPCID() == 209090 or Target:NPCID() == 211306 or Target:NPCID() == 214441 then
+  if true then
     ShouldReturn = TindralCDs()
     return ShouldReturn
   end
