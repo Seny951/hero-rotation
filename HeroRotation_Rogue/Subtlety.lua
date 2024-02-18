@@ -1369,8 +1369,7 @@ local function CDs ()
 
   -- Tindral
   -- Tindral, Fiery Vines, Scorched Treant
-  --if Target:NPCID() == 209090 or Target:NPCID() == 211306 or Target:NPCID() == 214441 then
-  if true then
+  if Target:NPCID() == 209090 or Target:NPCID() == 211306 or Target:NPCID() == 214441 then
     ShouldReturn = TindralCDs()
     return ShouldReturn
   end
