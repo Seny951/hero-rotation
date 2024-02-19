@@ -1164,7 +1164,7 @@ local function TindralCDs()
 
   -- Triple Dance, Double Vanish Profile
   if S.Vanish:IsReady() then
-    if S.SecretTechnique:TimeSinceLastCast() < 5 and S.Vanish:TimeSinceLastCast() > 8 and (Player:BuffUp(S.Flagellation) or Player:BuffUp(S.FlagellationPersistBuff))
+    if S.SecretTechnique:TimeSinceLastCast() < 8 and S.Vanish:TimeSinceLastCast() > 8 and (Player:BuffUp(S.Flagellation) or Player:BuffUp(S.FlagellationPersistBuff))
       and (S.ShadowBlades:CooldownRemains() <= 30 or S.ShadowBlades:CooldownRemains() >= 60) then
       ShouldReturn = StealthMacro(S.Vanish, StealthEnergyRequired)
       if ShouldReturn then return "Vanish Macro Custom Tindral " .. ShouldReturn end
@@ -1186,7 +1186,8 @@ local function TindralCDs()
   -- sync dance to flag when squeezing in the 2nd use in pull
   if S.ShadowDance:IsReady() then
     if not Player:StealthUp(true, true) and (S.SymbolsofDeath:IsReady() or (Player:BuffUp(S.SymbolsofDeath) and Player:BuffRemains(S.SymbolsofDeath) >= 8))
-      and Player:BuffUp(S.Flagellation) or S.Flagellation:CooldownRemains() >= 25 or S.ShadowBlades:CooldownRemains() >= 45 or S.ShadowDance:Charges() >= 2 then
+      and Player:BuffUp(S.Flagellation) or S.Flagellation:CooldownRemains() >= 25 or S.ShadowBlades:CooldownRemains() >= 45 or S.ShadowDance:Charges() >= 2
+      and not Player:StealthUp(true, true)then
       ShouldReturn = StealthMacro(S.ShadowDance, StealthEnergyRequired)
       if ShouldReturn then return "ShadowDance Macro Custom Tindral " .. ShouldReturn end
     end
