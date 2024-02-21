@@ -1064,7 +1064,7 @@ local function SmolderonCDs()
   local closestPastTime, closestFutureTime = findClosestTimes(WorldInFlamesTimings, currentFightTime)
 
   local canFlag = canCastTiming(closestPastTime, closestFutureTime, currentFightTime, 90-(30*S.Vanish:Charges()))
-  local canDance = canCastTiming(closestPastTime, closestFutureTime, currentFightTime, 60-(30*S.Vanish:Charges()))
+  local canDance = canCastTiming(closestPastTime, closestFutureTime, currentFightTime, 60)
 
   -- pot first and last intermission
   local canPot = currentFightTime > WorldInFlamesTimings[2] or currentFightTime > WorldInFlamesTimings[5]
