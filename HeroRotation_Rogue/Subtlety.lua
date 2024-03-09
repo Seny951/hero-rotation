@@ -1176,7 +1176,8 @@ local function TindralCDs()
   -- Shuriken Tornado with Symbols of Death on 3 and more targets
   -- Standard APL tornado suggestion (only on roots), Cant know which roots each person is assigned to so suggest it as standard on all roots if its up
   if HR.CDsON() and S.ShurikenTornado:IsAvailable() and S.ShurikenTornado:IsReady() then
-    if SnD_Condition() and (S.SymbolsofDeath:IsReady() or Player:BuffUp(S.SymbolsofDeath)) and EffectiveComboPoints <= 2 and not Player:BuffUp(S.Premeditation)
+    if SnD_Condition() and (S.ShadowDance:IsReady() or Player:BuffUp(S.ShadowDanceBuff))
+      and EffectiveComboPoints <= 2 and not Player:BuffUp(S.Premeditation)
       and (not S.Flagellation:IsAvailable() or S.Flagellation:CooldownRemains() > 20) and MeleeEnemies10yCount >= 3 and S.ShadowDance:IsReady() then
       if Cast(S.ShurikenTornado, Settings.Subtlety.GCDasOffGCD.ShurikenTornado) then return "Cast Shuriken Tornado Tindral" end
     end
@@ -1185,9 +1186,9 @@ local function TindralCDs()
   -- After vanishing redance as soon as subterfuge ends and symbols is ready or already up
   -- sync dance to flag when squeezing in the 2nd use in pull
   if S.ShadowDance:IsReady() then
-    if not Player:StealthUp(true, true) and (S.SymbolsofDeath:IsReady() or (Player:BuffUp(S.SymbolsofDeath) and Player:BuffRemains(S.SymbolsofDeath) >= 8))
-      and Player:BuffUp(S.Flagellation) or S.Flagellation:CooldownRemains() >= 25 or S.ShadowBlades:CooldownRemains() >= 45 or S.ShadowDance:Charges() >= 2
-      and not Player:StealthUp(true, true)then
+    if not Player:StealthUp(true, true)
+      and (S.SymbolsofDeath:IsReady() or (Player:BuffUp(S.SymbolsofDeath) and Player:BuffRemains(S.SymbolsofDeath) >= 8))
+      and (Player:BuffUp(S.Flagellation) or S.Flagellation:CooldownRemains() >= 25 or S.ShadowBlades:CooldownRemains() >= 45 or S.ShadowDance:Charges() >= 2) then
       ShouldReturn = StealthMacro(S.ShadowDance, StealthEnergyRequired)
       if ShouldReturn then return "ShadowDance Macro Custom Tindral " .. ShouldReturn end
     end
