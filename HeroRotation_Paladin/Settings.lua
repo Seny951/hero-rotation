@@ -63,6 +63,7 @@ HR.GUISettings.APL.Paladin = {
     }
   },
   Retribution = {
+    DisableCrusadeAWCDCheck = false,
     PotionType = {
       Selected = "Power",
     },
@@ -118,6 +119,7 @@ CreateARPanelOptions(CP_Protection2, "APL.Paladin.Protection")
 
 -- Retribution
 CreateARPanelOptions(CP_Retribution, "APL.Paladin.Retribution")
+CreatePanelOption("CheckButton", CP_Retribution, "APL.Paladin.Retribution.DisableCrusadeAWCDCheck", "Disable Crusade/AW CD Checks for Finishers and Cooldowns", "Enable this option to ignore the status of Crusade and Avenging Wrath when deciding whether to suggest finishers or other 'cooldown' abilities. NOTE: This causes the addon to stray from the APL, which will result in a DPS LOSS, but allows for smoother gameplay suggestions when you need to hold Crusade for any reason.")
 
 -- Holy
 CreateARPanelOptions(CP_Holy, "APL.Paladin.Holy")
