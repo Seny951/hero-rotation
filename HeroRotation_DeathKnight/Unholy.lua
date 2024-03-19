@@ -331,8 +331,9 @@ local function AoECDs()
 end
 
 local function AoESetup()
-  -- any_dnd,if=(!talent.bursting_sores|death_knight.fwounded_targets=active_enemies|death_knight.fwounded_targets>=8|raid_event.adds.exists&raid_event.adds.remains<=11&raid_event.adds.remains>5)
-  if AnyDnD:IsReady() and (not S.BurstingSores:IsAvailable() or S.FesteringWoundDebuff:AuraActiveCount() == ActiveEnemies or S.FesteringWoundDebuff:AuraActiveCount() >= 8) then
+  -- any_dnd,if=(!talent.bursting_sores|death_knight.fwounded_targets=active_enemies|death_knight.fwounded_targets>=8|raid_event.adds.exists&raid_event.adds.remains<=11&raid_event.adds.remains>5)&(!talent.defile|talent.defile&buff.defile.remains<gcd)
+  -- Note: Added 250ms buffer to the buff check to account for game/player latency.
+  if AnyDnD:IsReady() and ((not S.BurstingSores:IsAvailable() or S.FesteringWoundDebuff:AuraActiveCount() == ActiveEnemies or S.FesteringWoundDebuff:AuraActiveCount() >= 8) and (not S.Defile:IsAvailable() or S.Defile:IsAvailable() and Player:BuffRemains(S.DefileBuff) < Player:GCD() + 0.25)) then
     if Cast(AnyDnD, Settings.Commons2.GCDasOffGCD.DeathAndDecay) then return "any_dnd aoe_setup 2"; end
   end
   -- festering_strike,target_if=min:debuff.festering_wound.stack,if=death_knight.fwounded_targets<active_enemies&talent.bursting_sores
@@ -467,8 +468,12 @@ local function HighPrioActions()
       end
     end
   end
-  -- army_of_the_dead,if=talent.summon_gargoyle&cooldown.summon_gargoyle.remains<2|!talent.summon_gargoyle|fight_remains<35
-  if S.ArmyoftheDead:IsReady() and (S.SummonGargoyle:IsAvailable() and S.SummonGargoyle:CooldownRemains() < 2 or not S.SummonGargoyle:IsAvailable() or FightRemains < 35) then
+  -- any_dnd,if=variable.adds_remain&!death_and_decay.ticking&!talent.bursting_sores&talent.defile&buff.defile.remains<gcd
+  if AnyDnD:IsReady() and (VarAddsRemain and Player:BuffDown(S.DeathAndDecayBuff) and not S.BurstingSores:IsAvailable() and S.Defile:IsAvailable() and Player:BuffRemains(S.DefileBuff) < Player:GCD() + 0.25) then
+    if Cast(AnyDnD, Settings.Commons2.GCDasOffGCD.DeathAndDecay) then return "any_dnd high_prio_actions 3"; end
+  end
+  -- army_of_the_dead,if=talent.summon_gargoyle&cooldown.summon_gargoyle.remains<3*gcd|!talent.summon_gargoyle|fight_remains<35
+  if S.ArmyoftheDead:IsReady() and (S.SummonGargoyle:IsAvailable() and S.SummonGargoyle:CooldownRemains() < 3 * Player:GCD() or not S.SummonGargoyle:IsAvailable() or FightRemains < 35) then
     if Cast(S.ArmyoftheDead, nil, Settings.Unholy.DisplayStyle.ArmyOfTheDead) then return "army_of_the_dead high_prio_actions 4"; end
   end
   -- death_coil,if=(active_enemies<=3|!talent.epidemic)&(pet.gargoyle.active&talent.commander_of_the_dead&buff.commander_of_the_dead.up&cooldown.apocalypse.remains<5&buff.commander_of_the_dead.remains>26|debuff.death_rot.up&debuff.death_rot.remains<gcd)
