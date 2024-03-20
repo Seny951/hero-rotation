@@ -1102,9 +1102,9 @@ local function SmolderonCDs()
     end
   end
 
-  -- After vanishing redance straight away except on the pull
+  -- After vanishing redance as soon as subterfuge ends and symbols is ready or already up
   if S.ShadowDance:IsReady() then
-    if currentFightTime > 60 and ((S.Vanish:TimeSinceLastCast() < 8 or canDance)) and S.SymbolsofDeath:IsReady() then
+    if not Player:StealthUp(true, true) and ((S.Vanish:TimeSinceLastCast() < 8 or canDance)) and S.SymbolsofDeath:IsReady() then
       ShouldReturn = StealthMacro(S.ShadowDance, StealthEnergyRequired)
       if ShouldReturn then return "ShadowDance Macro Custom Smolderon " .. ShouldReturn end
     end
@@ -1184,7 +1184,6 @@ local function TindralCDs()
   end
 
   -- After vanishing redance as soon as subterfuge ends and symbols is ready or already up
-  -- sync dance to flag when squeezing in the 2nd use in pull
   if S.ShadowDance:IsReady() then
     if not Player:StealthUp(true, true)
       and (S.SymbolsofDeath:IsReady() or (Player:BuffUp(S.SymbolsofDeath) and Player:BuffRemains(S.SymbolsofDeath) >= 8))
