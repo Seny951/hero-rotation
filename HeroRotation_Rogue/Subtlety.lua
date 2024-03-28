@@ -1224,9 +1224,9 @@ local function FyrakkCDs()
   local colossi = {0, 240, 330}
   local lastColossi, nextColossi = findClosestTimes(colossi, currentFightTime)
 
-  local canFlag = canCastPcnt(70, 90-(30*S.Vanish:Charges()))
+  local canFlag = canCastPcnt(70, 90)
   if canFlag then
-    canFlag = canCastTiming(lastColossi, nextColossi, currentFightTime, 90-(30*S.Vanish:Charges()))
+    canFlag = canCastTiming(lastColossi, nextColossi, currentFightTime, 90)
   end
 
   local canDance = canCastPcnt(70, 60)
