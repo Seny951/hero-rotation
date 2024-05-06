@@ -459,7 +459,7 @@ local function CDs ()
     -- actions.cds+=/use_item,name=stormeaters_boon,if=spell_targets.blade_flurry>desired_targets|raid_event.adds.in>60|fight_remains<10
     if I.StormEatersBoon:IsEquippedAndReady() then
       if EnemiesBFCount > 2 or HL.BossFilteredFightRemains("<", 10) then
-        if Cast(I.StormEatersBoon, nil, Settings.CommonsDS.DisplayStyle.Trinkets, not Target:IsInRange((I.StormEatersBoon:OnUseSpell()).MaximumRange)) then return "Storm Eaters Boon"; end
+        if Cast(I.StormEatersBoon, nil, Settings.CommonsDS.DisplayStyle.Trinkets) then return "Storm Eaters Boon"; end
       end
     end
 
