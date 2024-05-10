@@ -361,7 +361,7 @@ local function Finish (ReturnSpellOnly, StealthSpell)
   -- Seny Only Add cold blood to sec tech when shadow blades is either up or isn't in range to be pulled by vanish for double dance windows where we want to CB on the 2nd cast
   if S.ColdBlood:IsReady() and Secret_Condition(ShadowDanceBuff, PremeditationBuff) and S.SecretTechnique:IsReady() and
     (S.ShadowBlades:CooldownRemains() >= 30 or Player:BuffUp(S.ShadowBlades) or S.ShadowBlades:IsReady()) then
-    if Settings.Commons.OffGCDasOffGCD.ColdBlood then
+    if Settings.CommonsOGCD.OffGCDasOffGCD.ColdBlood then
       Cast(S.ColdBlood, Settings.CommonsOGCD.OffGCDasOffGCD.ColdBlood)
     else
       if ReturnSpellOnly then return S.ColdBlood end
