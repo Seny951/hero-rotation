@@ -615,7 +615,7 @@ local function RacialsTrinkets()
     if I.AshesoftheEmbersoul:IsEquippedAndReady() then
       if Player:BuffUp(S.Flagellation) or Player:BuffUp(S.FlagellationPersistBuff) and ((Player:BuffUp(S.ColdBlood) or S.ColdBlood:IsReady()) or (not S.DanseMacabre:IsAvailable() and Player:BuffUp(S.ShadowDance)
         or Player:BuffStack(S.DanseMacabre) >= 3) and not S.ColdBlood:IsAvailable()) or HL.BossFilteredFightRemains("<", 10) then
-        if Cast(I.AshesoftheEmbersoul, nil, Settings.Commons.DisplayStyle.Trinkets) then return "Ashes of the Embersoul" end
+        if Cast(I.AshesoftheEmbersoul, nil, Settings.CommonsDS.DisplayStyle.Trinkets) then return "Ashes of the Embersoul" end
       end
     end
   end
@@ -625,7 +625,7 @@ local function RacialsTrinkets()
   if Settings.Commons.Enabled.Trinkets then
     if I.WitherbarksBranch:IsEquippedAndReady() then
       if Player:BuffUp(S.Flagellation) and (S.InvigoratingShadowdust:IsAvailable() or Player:BuffUp(S.ShadowBlades) or I.BandolierOfTwistedBlades:IsEquippedAndReady()) then
-        if Cast(I.WitherbarksBranch, nil, Settings.Commons.DisplayStyle.Trinkets) then return "Witherbark's Branch" end
+        if Cast(I.WitherbarksBranch, nil, Settings.CommonsDS.DisplayStyle.Trinkets) then return "Witherbark's Branch" end
       end
     end
   end
@@ -634,7 +634,7 @@ local function RacialsTrinkets()
   if Settings.Commons.Enabled.Trinkets then
     if I.Mirror:IsEquippedAndReady() then
       if Player:BuffUp(S.ShadowDance) and (Target:TimeToDie() >= 15 or I.AshesoftheEmbersoul:IsEquipped()) then
-        if Cast(I.Mirror, nil, Settings.Commons.DisplayStyle.Trinkets) then return "Mirror Of Fractured Tomorrows" end
+        if Cast(I.Mirror, nil, Settings.CommonsDS.DisplayStyle.Trinkets) then return "Mirror Of Fractured Tomorrows" end
       end
     end
   end
@@ -648,7 +648,7 @@ local function RacialsTrinkets()
       or HL.BossFilteredFightRemains("<", 10)) then
     local TrinketToUse = Player:GetUseableItems(OnUseExcludes)
     if TrinketToUse then
-      if Cast(TrinketToUse, nil, Settings.Commons.DisplayStyle.Trinkets) then
+      if Cast(TrinketToUse, nil, Settings.CommonsDS.DisplayStyle.Trinkets) then
         return "Generic use_items for" .. TrinketToUse:Name()
       end
     end
@@ -667,7 +667,7 @@ local function GnarlrootCDs()
 
   if HR.CDsON() and S.Flagellation:IsAvailable() and S.Flagellation:IsReady() then
     if canFlag and S.InvigoratingShadowdust:IsAvailable() and EffectiveComboPoints >= 5 and S.ShadowDance:IsReady() and S.SymbolsofDeath:IsReady() then
-      if Cast(S.Flagellation, nil, Settings.Commons.DisplayStyle.Signature) then return "Cast Flagellation Gnarlroot" end
+      if Cast(S.Flagellation, nil, Settings.CommonsDS.DisplayStyle.Signature) then return "Cast Flagellation Gnarlroot" end
     end
   end
 
@@ -726,7 +726,7 @@ local function GnarlrootCDs()
     local PotionSelected = Everyone.PotionSelected()
     if PotionSelected and PotionSelected:IsReady() and (Player:BloodlustUp() or HL.BossFilteredFightRemains("<", 30) or Player:BuffUp(S.SymbolsofDeath)
       and (Player:BuffUp(S.ShadowBlades) or S.ShadowBlades:CooldownRemains() <= 10)) then
-      if Cast(PotionSelected, nil, Settings.Commons.DisplayStyle.Potions) then return "Cast Potion"; end
+      if Cast(PotionSelected, nil, Settings.CommonsDS.DisplayStyle.Potions) then return "Cast Potion"; end
     end
   end
 
@@ -740,7 +740,7 @@ end
 local function IgiraCDs()
   if HR.CDsON() and S.Flagellation:IsAvailable() and S.Flagellation:IsReady() then
     if S.InvigoratingShadowdust:IsAvailable() and EffectiveComboPoints >= 5 and S.ShadowDance:IsReady() and S.SymbolsofDeath:IsReady() and S.ShadowBlades:CooldownRemains() <= 30 then
-      if Cast(S.Flagellation, nil, Settings.Commons.DisplayStyle.Signature) then return "Cast Flagellation Igira" end
+      if Cast(S.Flagellation, nil, Settings.CommonsDS.DisplayStyle.Signature) then return "Cast Flagellation Igira" end
     end
   end
 
@@ -800,7 +800,7 @@ local function IgiraCDs()
     local PotionSelected = Everyone.PotionSelected()
     if PotionSelected and PotionSelected:IsReady() and (Player:BloodlustUp() or HL.BossFilteredFightRemains("<", 30) or Player:BuffUp(S.SymbolsofDeath)
       and (Player:BuffUp(S.ShadowBlades) or S.ShadowBlades:CooldownRemains() <= 10)) then
-      if Cast(PotionSelected, nil, Settings.Commons.DisplayStyle.Potions) then return "Cast Potion"; end
+      if Cast(PotionSelected, nil, Settings.CommonsDS.DisplayStyle.Potions) then return "Cast Potion"; end
     end
   end
 
@@ -814,7 +814,7 @@ end
 local function VolcorossCDs()
   if HR.CDsON() and S.Flagellation:IsAvailable() and S.Flagellation:IsReady() then
     if S.InvigoratingShadowdust:IsAvailable() and EffectiveComboPoints >= 5 and S.ShadowDance:IsReady() and S.SymbolsofDeath:IsReady() and S.ShadowBlades:CooldownRemains() <= 30 then
-      if Cast(S.Flagellation, nil, Settings.Commons.DisplayStyle.Signature) then return "Cast Flagellation Volcoross" end
+      if Cast(S.Flagellation, nil, Settings.CommonsDS.DisplayStyle.Signature) then return "Cast Flagellation Volcoross" end
     end
   end
 
@@ -861,7 +861,7 @@ local function VolcorossCDs()
     local PotionSelected = Everyone.PotionSelected()
     if PotionSelected and PotionSelected:IsReady() and (Player:BloodlustUp() or HL.BossFilteredFightRemains("<", 30) or Player:BuffUp(S.SymbolsofDeath)
       and (Player:BuffUp(S.ShadowBlades) or S.ShadowBlades:CooldownRemains() <= 10)) then
-      if Cast(PotionSelected, nil, Settings.Commons.DisplayStyle.Potions) then return "Cast Potion"; end
+      if Cast(PotionSelected, nil, Settings.CommonsDS.DisplayStyle.Potions) then return "Cast Potion"; end
     end
   end
 
@@ -875,7 +875,7 @@ end
 local function CouncilCDs()
   if HR.CDsON() and S.Flagellation:IsAvailable() and S.Flagellation:IsReady() then
     if S.InvigoratingShadowdust:IsAvailable() and EffectiveComboPoints >= 5 and S.ShadowDance:IsReady() and S.SymbolsofDeath:IsReady() and S.ShadowBlades:CooldownRemains() <= 30 then
-      if Cast(S.Flagellation, nil, Settings.Commons.DisplayStyle.Signature) then return "Cast Flagellation Council" end
+      if Cast(S.Flagellation, nil, Settings.CommonsDS.DisplayStyle.Signature) then return "Cast Flagellation Council" end
     end
   end
 
@@ -922,7 +922,7 @@ local function CouncilCDs()
     local PotionSelected = Everyone.PotionSelected()
     if PotionSelected and PotionSelected:IsReady() and (Player:BloodlustUp() or HL.BossFilteredFightRemains("<", 30) or Player:BuffUp(S.SymbolsofDeath)
       and (Player:BuffUp(S.ShadowBlades) or S.ShadowBlades:CooldownRemains() <= 10)) then
-      if Cast(PotionSelected, nil, Settings.Commons.DisplayStyle.Potions) then return "Cast Potion"; end
+      if Cast(PotionSelected, nil, Settings.CommonsDS.DisplayStyle.Potions) then return "Cast Potion"; end
     end
   end
 
@@ -936,7 +936,7 @@ end
 local function LarodarCDs()
   if HR.CDsON() and S.Flagellation:IsAvailable() and S.Flagellation:IsReady() then
     if S.InvigoratingShadowdust:IsAvailable() and EffectiveComboPoints >= 5 and S.ShadowDance:IsReady() and S.SymbolsofDeath:IsReady() and S.ShadowBlades:CooldownRemains() <= 30 then
-      if Cast(S.Flagellation, nil, Settings.Commons.DisplayStyle.Signature) then return "Cast Flagellation Larodar" end
+      if Cast(S.Flagellation, nil, Settings.CommonsDS.DisplayStyle.Signature) then return "Cast Flagellation Larodar" end
     end
   end
 
@@ -985,7 +985,7 @@ local function LarodarCDs()
     local PotionSelected = Everyone.PotionSelected()
     if PotionSelected and PotionSelected:IsReady() and (Player:BloodlustUp() or HL.BossFilteredFightRemains("<", 30) or Player:BuffUp(S.SymbolsofDeath)
       and (Player:BuffUp(S.ShadowBlades) or S.ShadowBlades:CooldownRemains() <= 10)) then
-      if Cast(PotionSelected, nil, Settings.Commons.DisplayStyle.Potions) then return "Cast Potion"; end
+      if Cast(PotionSelected, nil, Settings.CommonsDS.DisplayStyle.Potions) then return "Cast Potion"; end
     end
   end
 
@@ -999,7 +999,7 @@ end
 local function NymueCDs()
   if HR.CDsON() and S.Flagellation:IsAvailable() and S.Flagellation:IsReady() then
     if S.InvigoratingShadowdust:IsAvailable() and EffectiveComboPoints >= 5 and S.ShadowDance:IsReady() and S.SymbolsofDeath:IsReady()then
-      if Cast(S.Flagellation, nil, Settings.Commons.DisplayStyle.Signature) then return "Cast Flagellation Council" end
+      if Cast(S.Flagellation, nil, Settings.CommonsDS.DisplayStyle.Signature) then return "Cast Flagellation Council" end
     end
   end
 
@@ -1048,7 +1048,7 @@ local function NymueCDs()
     local PotionSelected = Everyone.PotionSelected()
     if PotionSelected and PotionSelected:IsReady() and (Player:BloodlustUp() or HL.BossFilteredFightRemains("<", 30) or Player:BuffUp(S.SymbolsofDeath)
       and (Player:BuffUp(S.ShadowBlades) or S.ShadowBlades:CooldownRemains() <= 10)) then
-      if Cast(PotionSelected, nil, Settings.Commons.DisplayStyle.Potions) then return "Cast Potion"; end
+      if Cast(PotionSelected, nil, Settings.CommonsDS.DisplayStyle.Potions) then return "Cast Potion"; end
     end
   end
 
@@ -1075,7 +1075,7 @@ local function SmolderonCDs()
 
   if HR.CDsON() and S.Flagellation:IsAvailable() and S.Flagellation:IsReady() then
     if canFlag and S.InvigoratingShadowdust:IsAvailable() and EffectiveComboPoints >= 5 and S.ShadowDance:IsReady() and S.SymbolsofDeath:IsReady() and S.ShadowBlades:CooldownRemains() <= 30 then
-      if Cast(S.Flagellation, nil, Settings.Commons.DisplayStyle.Signature) then return "Cast Flagellation Smolderon" end
+      if Cast(S.Flagellation, nil, Settings.CommonsDS.DisplayStyle.Signature) then return "Cast Flagellation Smolderon" end
     end
   end
 
@@ -1123,7 +1123,7 @@ local function SmolderonCDs()
   if Settings.Commons.Enabled.Potions then
     local PotionSelected = Everyone.PotionSelected()
     if PotionSelected and PotionSelected:IsReady() and canPot then
-      if Cast(PotionSelected, nil, Settings.Commons.DisplayStyle.Potions) then return "Cast Potion Smolderon"; end
+      if Cast(PotionSelected, nil, Settings.CommonsDS.DisplayStyle.Potions) then return "Cast Potion Smolderon"; end
     end
   end
 
@@ -1146,7 +1146,7 @@ local function TindralCDs()
 
   if HR.CDsON() and S.Flagellation:IsAvailable() and S.Flagellation:IsReady() then
     if canFlag and S.InvigoratingShadowdust:IsAvailable() and EffectiveComboPoints >= 5 and S.ShadowDance:IsReady() then
-      if Cast(S.Flagellation, nil, Settings.Commons.DisplayStyle.Signature) then return "Cast Flagellation Tindral" end
+      if Cast(S.Flagellation, nil, Settings.CommonsDS.DisplayStyle.Signature) then return "Cast Flagellation Tindral" end
     end
   end
 
@@ -1207,7 +1207,7 @@ local function TindralCDs()
     local PotionSelected = Everyone.PotionSelected()
     if PotionSelected and PotionSelected:IsReady() and (Player:BloodlustUp() or HL.BossFilteredFightRemains("<", 30) or Player:BuffUp(S.SymbolsofDeath)
       and (Player:BuffUp(S.ShadowBlades) or S.ShadowBlades:CooldownRemains() <= 10)) then
-      if Cast(PotionSelected, nil, Settings.Commons.DisplayStyle.Potions) then return "Cast Potion"; end
+      if Cast(PotionSelected, nil, Settings.CommonsDS.DisplayStyle.Potions) then return "Cast Potion"; end
     end
   end
 
@@ -1242,7 +1242,7 @@ local function FyrakkCDs()
 
   if HR.CDsON() and S.Flagellation:IsAvailable() and S.Flagellation:IsReady() then
     if canFlag and S.InvigoratingShadowdust:IsAvailable() and EffectiveComboPoints >= 5 and S.ShadowDance:IsReady() and S.SymbolsofDeath:IsReady() and S.ShadowBlades:CooldownRemains() <= 30 then
-      if Cast(S.Flagellation, nil, Settings.Commons.DisplayStyle.Signature) then return "Cast Flagellation Fyrakk" end
+      if Cast(S.Flagellation, nil, Settings.CommonsDS.DisplayStyle.Signature) then return "Cast Flagellation Fyrakk" end
     end
   end
 
@@ -1309,7 +1309,7 @@ local function FyrakkCDs()
     local PotionSelected = Everyone.PotionSelected()
     if PotionSelected and PotionSelected:IsReady() and (Player:BloodlustUp() or HL.BossFilteredFightRemains("<", 30) or Player:BuffUp(S.SymbolsofDeath)
       and (Player:BuffUp(S.ShadowBlades) or S.ShadowBlades:CooldownRemains() <= 10)) then
-      if Cast(PotionSelected, nil, Settings.Commons.DisplayStyle.Potions) then return "Cast Potion"; end
+      if Cast(PotionSelected, nil, Settings.CommonsDS.DisplayStyle.Potions) then return "Cast Potion"; end
     end
   end
 
