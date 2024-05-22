@@ -609,47 +609,70 @@ local function RacialsTrinkets()
     if Cast(S.AncestralCall, Settings.Commons.OffGCDasOffGCD.Racials) then return "Cast Ancestral Call" end
   end
 
-  -- actions.cds+=/use_item,name=ashes_of_the_embersoul,if=(buff.cold_blood.up|(!talent.danse_macabre&buff.shadow_dance.up
-  -- |buff.danse_macabre.stack>=3)&!talent.cold_blood)|fight_remains<10
   if Settings.Commons.Enabled.Trinkets then
+    -- use_item,name=irideus_fragment,if=(buff.cold_blood.up|(!talent.danse_macabre&buff.shadow_dance.up
+    -- |buff.danse_macabre.stack>=3)&!talent.cold_blood)|fight_remains<10
+    if I.IrideusFragment:IsEquippedAndReady() then
+      if ((Player:BuffUp(S.ColdBlood) or S.ColdBlood:CooldownUp()) or (not S.DanseMacabre:IsAvailable() and Player:BuffUp(S.ShadowDance)
+        or Player:BuffStack(S.DanseMacabre) >= 3) and not S.ColdBlood:IsAvailable()) or HL.BossFilteredFightRemains("<", 10) then
+        if Cast(I.IrideusFragment, nil, Settings.CommonsDS.DisplayStyle.Trinkets) then return "Irideus Fragment" end
+      end
+    end
+    -- use_item,name=ashes_of_the_embersoul,if=(buff.cold_blood.up|(!talent.danse_macabre&buff.shadow_dance.up
+    -- |buff.danse_macabre.stack>=3)&!talent.cold_blood)|fight_remains<10
     if I.AshesoftheEmbersoul:IsEquippedAndReady() then
-      if Player:BuffUp(S.Flagellation) or Player:BuffUp(S.FlagellationPersistBuff) and ((Player:BuffUp(S.ColdBlood) or S.ColdBlood:IsReady()) or (not S.DanseMacabre:IsAvailable() and Player:BuffUp(S.ShadowDance)
+      if ((Player:BuffUp(S.ColdBlood) or S.ColdBlood:CooldownUp()) or (not S.DanseMacabre:IsAvailable() and Player:BuffUp(S.ShadowDance)
         or Player:BuffStack(S.DanseMacabre) >= 3) and not S.ColdBlood:IsAvailable()) or HL.BossFilteredFightRemains("<", 10) then
         if Cast(I.AshesoftheEmbersoul, nil, Settings.CommonsDS.DisplayStyle.Trinkets) then return "Ashes of the Embersoul" end
       end
     end
-  end
 
-  -- actions.cds+=/use_item,name=witherbarks_branch,if=buff.flagellation_buff.up&talent.invigorating_shadowdust
-  -- |buff.shadow_blades.up|equipped.bandolier_of_twisted_blades&raid_event.adds.up
-  if Settings.Commons.Enabled.Trinkets then
+    -- actions.cds+=/use_item,name=witherbarks_branch,if=buff.flagellation_buff.up&talent.invigorating_shadowdust
+    -- |buff.shadow_blades.up|equipped.bandolier_of_twisted_blades&raid_event.adds.up
     if I.WitherbarksBranch:IsEquippedAndReady() then
       if Player:BuffUp(S.Flagellation) and (S.InvigoratingShadowdust:IsAvailable() or Player:BuffUp(S.ShadowBlades) or I.BandolierOfTwistedBlades:IsEquippedAndReady()) then
         if Cast(I.WitherbarksBranch, nil, Settings.CommonsDS.DisplayStyle.Trinkets) then return "Witherbark's Branch" end
       end
     end
-  end
 
-  -- actions.cds+=/use_item,name=mirror_of_fractured_tomorrows,if=buff.shadow_dance.up&(target.time_to_die>=15|equipped.ashes_of_the_embersoul)
-  if Settings.Commons.Enabled.Trinkets then
+    -- actions.cds+=/use_item,name=mirror_of_fractured_tomorrows,if=buff.shadow_dance.up&(target.time_to_die>=15|equipped.ashes_of_the_embersoul)
     if I.Mirror:IsEquippedAndReady() then
       if Player:BuffUp(S.ShadowDance) and (Target:TimeToDie() >= 15 or I.AshesoftheEmbersoul:IsEquipped()) then
         if Cast(I.Mirror, nil, Settings.CommonsDS.DisplayStyle.Trinkets) then return "Mirror Of Fractured Tomorrows" end
       end
     end
-  end
 
-  -- actions.cds+=/use_items,if=!stealthed.all&(!trinket.mirror_of_fractured_tomorrows.cooldown.ready|!equipped.mirror_of_fractured_tomorrows)|fight_remains<10
-  -- Default fallback for usable items: Use outside of Stealth/Shadow Dance.
-  if not Player:StealthUp(true, true) and (
-    (not I.Mirror:IsReady() or not I.Mirror:IsEquipped()) and
-      ((I.WitherbarksBranch:IsEquipped() and not I.WitherbarksBranch:IsReady() and not I.AshesoftheEmbersoul:IsEquipped()) or
-        (I.AshesoftheEmbersoul:IsEquipped() and not I.AshesoftheEmbersoul:IsReady() and not I.WitherbarksBranch:IsEquipped()))
-      or HL.BossFilteredFightRemains("<", 10)) then
-    local TrinketToUse = Player:GetUseableItems(OnUseExcludes)
-    if TrinketToUse then
-      if Cast(TrinketToUse, nil, Settings.CommonsDS.DisplayStyle.Trinkets) then
-        return "Generic use_items for" .. TrinketToUse:Name()
+    -- actions.cds+=/use_item,name=beacon_to_the_beyond,if=!stealthed.all&(buff.deeper_daggers.up|!talent.deeper_daggers)&
+    -- (!raid_event.adds.up|!equipped.stormeaters_boon|trinket.stormeaters_boon.cooldown.remains>20)
+    if I.BeaconToTheBeyond:IsEquippedAndReady() then
+      if not Player:StealthUp(true, true) and (Player:BuffUp(S.DeeperDaggersBuff) or not S.DeeperDaggers:IsAvailable()) and
+        (not I.StormEatersBoon:IsEquipped() or I.StormEatersBoon:CooldownRemains() > 20) then
+        if Cast(I.BeaconToTheBeyond, nil, Settings.CommonsDS.DisplayStyle.Trinkets) then return "Beacon To The Beyond" end
+      end
+    end
+
+    -- use_item,name=manic_grieftorch,if=!buff.shadow_blades.up&!buff.shadow_dance.up&(!trinket.mirror_of_fractured_tomorrows.cooldown.ready|!equipped.mirror_of_fractured_tomorrows)
+    -- &(!trinket.ashes_of_the_embersoul.cooldown.ready|!equipped.ashes_of_the_embersoul)&(!trinket.irideus_fragment.cooldown.ready|!equipped.irideus_fragment)
+    -- |fight_remains<10
+    if I.ManicGrieftorch:IsEquippedAndReady() then
+      if Player:BuffDown(S.ShadowBlades) and Player:BuffDown(S.ShadowDanceBuff) and (I.Mirror:CooldownDown() or not I.Mirror:IsEquipped())
+        and (I.AshesoftheEmbersoul:CooldownDown() or not I.AshesoftheEmbersoul:IsEquipped()) and (I.IrideusFragment:CooldownDown() or not I.IrideusFragment:IsEquipped())
+        or HL.BossFilteredFightRemains("<", 10) then
+        if Cast(I.ManicGrieftorch, nil, Settings.CommonsDS.DisplayStyle.Trinkets) then return "Manic Grieftorch" end
+      end
+    end
+
+    -- actions.cds+=/use_items,if=!stealthed.all&(!trinket.mirror_of_fractured_tomorrows.cooldown.ready|!equipped.mirror_of_fractured_tomorrows)&(!trinket.ashes_of_the_embersoul.cooldown.ready|!equipped.ashes_of_the_embersoul)|fight_remains<10
+    -- Default fallback for usable items: Use outside of Stealth/Shadow Dance.
+    if not Player:StealthUp(true, true) and (
+      (not I.Mirror:IsReady() or not I.Mirror:IsEquipped()) and
+        (not I.AshesoftheEmbersoul:IsReady() or not I.AshesoftheEmbersoul:IsEquipped()) or
+        HL.BossFilteredFightRemains("<", 10)) then
+      local TrinketToUse = Player:GetUseableItems(OnUseExcludes)
+      if TrinketToUse then
+        if Cast(TrinketToUse, nil, Settings.CommonsDS.DisplayStyle.Trinkets) then
+          return "Generic use_items for " .. TrinketToUse:Name()
+        end
       end
     end
   end
