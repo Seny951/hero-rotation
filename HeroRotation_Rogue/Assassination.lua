@@ -649,9 +649,9 @@ local function CDs ()
 
   -- actions.cds=variable,name=deathmark_ma_condition,value=!talent.master_assassin.enabled|dot.garrote.ticking
   -- actions.cds+=/variable,name=deathmark_kingsbane_condition,value=!talent.kingsbane|cooldown.kingsbane.remains<=2
-  -- actions.cds+=/variable,name=deathmark_condition,value=!stealthed.rogue&buff.slice_and_dice.remains>5&dot.rupture.ticking
+  -- actions.cds+=/variable,name=deathmark_condition,value=!stealthed.rogue&dot.rupture.ticking
   -- &buff.envenom.up&!debuff.deathmark.up&variable.deathmark_ma_condition&variable.deathmark_kingsbane_condition
-  local DeathmarkCondition = not Player:StealthUp(true, false) and Player:BuffRemains(S.SliceandDice) > 5 and Target:DebuffUp(S.Rupture)
+  local DeathmarkCondition = not Player:StealthUp(true, false) and Target:DebuffUp(S.Rupture)
     and Player:BuffUp(S.Envenom) and not S.Deathmark:AnyDebuffUp()
     and (not S.MasterAssassin:IsAvailable() or Target:DebuffUp(S.Garrote))
     and (not S.Kingsbane:IsAvailable() or S.Kingsbane:CooldownRemains() <= 2)
@@ -962,15 +962,6 @@ local function APL ()
       ShouldReturn = Rogue.Stealth(Rogue.StealthSpell())
       if ShouldReturn then return ShouldReturn end
     end
-    -- Opener
-    if Everyone.TargetIsValid() then
-      -- actions.precombat+=/slice_and_dice,precombat_seconds=1
-      if not Player:BuffUp(S.SliceandDice) then
-        if S.SliceandDice:IsReady() and ComboPoints >= 2 then
-          if Cast(S.SliceandDice) then return "Cast Slice and Dice" end
-        end
-      end
-    end
   end
 
   if Everyone.TargetIsValid() then
@@ -997,17 +988,9 @@ local function APL ()
       if ShouldReturn then return ShouldReturn .. " (Stealthed)" end
     end
 
-    -- # Put SnD up initially for Cut to the Chase, refresh with Envenom if at low duration
-    -- actions+=/slice_and_dice,if=!buff.slice_and_dice.up&dot.rupture.ticking&combo_points>=1
-    -- &(!buff.indiscriminate_carnage.up|variable.single_target)
-    if not Player:BuffUp(S.SliceandDice) then
-      if S.SliceandDice:IsReady() and Target:DebuffUp(S.Rupture) and Player:ComboPoints() >= 1
-        and (Player:BuffDown(S.IndiscriminateCarnageBuff) or SingleTarget) then
-        if Cast(S.SliceandDice) then return "Cast Slice and Dice" end
-      end
-    elseif TargetInAoERange then
-      -- actions+=/envenom,if=buff.slice_and_dice.up&buff.slice_and_dice.remains<5&combo_points>=5
-      if S.Envenom:IsReady() and Player:BuffRemains(S.SliceandDice) < 5 and Player:ComboPoints() >= 5 then
+    if TargetInAoERange then
+      -- actions+=/envenom,if=combo_points>=5
+      if S.Envenom:IsReady() and Player:ComboPoints() >= 5 then
         if Cast(S.Envenom, nil, nil, not TargetInMeleeRange) then return "Cast Envenom (CttC)" end
       end
     else
