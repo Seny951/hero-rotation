@@ -254,7 +254,7 @@ local function Vanish_DPS_Condition ()
   return Settings.Commons.UseDPSVanish and (not Player:IsTanking(Target) or Settings.Commons.UseSoloVanish)
 end
 
-local function Stealth(ReturnSpellOnly)
+local function Stealth(ReturnSpellOnly, BaseSpell)
   if S.BladeFlurry:IsReady() then
     if S.DeftManeuvers:IsAvailable() and not Finish_Condition() and (EnemiesBFCount >= 3
       and ComboPointsDeficit == EnemiesBFCount + num(Player:BuffUp(S.Broadside)) or EnemiesBFCount >= 5) then
@@ -272,7 +272,7 @@ local function Stealth(ReturnSpellOnly)
   end
 
   -- actions.stealth+=/between_the_eyes,if=variable.finish_condition&talent.crackshot&(!buff.shadowmeld.up|stealthed.rogue)
-  if S.BetweentheEyes:IsCastable() and Target:IsSpellInRange(S.BetweentheEyes) and Finish_Condition() and S.Crackshot:IsAvailable()
+  if (S.BetweentheEyes:IsCastable() or BaseSpell == S.Vanish) and Target:IsSpellInRange(S.BetweentheEyes) and Finish_Condition() and S.Crackshot:IsAvailable()
     and (not Player:BuffUp(S.Shadowmeld) or Player:StealthUp(true, false)) then
     if ReturnSpellOnly then
       return S.BetweentheEyes
@@ -336,30 +336,6 @@ local function Finish(ReturnSpellOnly)
     end
   end
 
-  -- Crackshot builds use Between the Eyes outside of Stealth if we are unlikely to enter a Stealth window before the
-  -- next BtE cast or if we are unlikely to lose Adrenaline Rush uptime by hitting BtE before the next cast of Vanish
-  -- actions.finish+=/between_the_eyes,if=talent.crackshot&(cooldown.vanish.remains>45|talent.underhanded_upper_hand
-  -- &talent.without_a_trace&(buff.adrenaline_rush.remains>10|buff.adrenaline_rush.down&cooldown.adrenaline_rush.remains>45))
-  -- &(raid_event.adds.remains>8|raid_event.adds.in<raid_event.adds.remains|!raid_event.adds.up)
-  if S.BetweentheEyes:IsCastable() and Target:IsSpellInRange(S.BetweentheEyes) and Settings.Outlaw.UseBtEOutsideOfStealth then
-    if S.Crackshot:IsAvailable() and (S.Vanish:CooldownRemains() > 45 or S.UnderhandedUpperhand:IsAvailable()
-      and S.WithoutATrace:IsAvailable() and (Player:BuffRemains(S.AdrenalineRush) > 10 or Player:BuffDown(S.AdrenalineRush)
-      and S.AdrenalineRush:CooldownRemains() > 45)) and (HL.FilteredFightRemains(EnemiesBF, ">", 30)) then
-        if CastPooling(S.BetweentheEyes) then return "Cast Between the Eyes" end
-    end
-  end
-
-  -- actions.finish+=/slice_and_dice,if=buff.slice_and_dice.remains<fight_remains&refreshable
-  -- Note: Added Player:BuffRemains(S.SliceandDice) == 0 to maintain the buff while TTD is invalid (it's mainly for Solo, not an issue in raids)
-  if S.SliceandDice:IsCastable() and (HL.FilteredFightRemains(EnemiesBF, ">", Player:BuffRemains(S.SliceandDice), true) or Player:BuffRemains(S.SliceandDice) == 0)
-    and Player:BuffRemains(S.SliceandDice) < (1 + ComboPoints) * 1.8 then
-    if ReturnSpellOnly then
-      return S.SliceandDice
-    else
-      if CastPooling(S.SliceandDice) then return "Cast Slice and Dice" end
-    end
-  end
-
   if S.ColdBlood:IsCastable() and Player:BuffDown(S.ColdBlood) and Target:IsSpellInRange(S.Dispatch) then
     if Cast(S.ColdBlood, Settings.CommonsOGCD.OffGCDasOffGCD.ColdBlood) then return "Cast Cold Blood" end
   end
@@ -392,7 +368,7 @@ local function SpellQueueMacro (BaseSpell)
   -- If false, just suggest them as off-GCD and bail out of the macro functionality
   if BaseSpell:ID() == S.Vanish:ID() or BaseSpell:ID() == S.Shadowmeld:ID() then
     -- Fetch stealth spell
-    MacroAbility = Stealth(true)
+    MacroAbility = Stealth(true, BaseSpell)
     if BaseSpell:ID() == S.Vanish:ID() and (not Settings.Outlaw.SpellQueueMacro.Vanish or not MacroAbility) then
       if Cast(S.Vanish, Settings.CommonsOGCD.OffGCDasOffGCD.Vanish) then return "Cast Vanish" end
       return false
@@ -567,6 +543,13 @@ local function CDs ()
   -- actions.finish+=/killing_spree,if=variable.finish_condition&!stealthed.all
   if S.KillingSpree:IsCastable() and Target:IsSpellInRange(S.KillingSpree) and Finish_Condition() and not Player:StealthUp(true, true) then
     if Cast(S.KillingSpree, nil, Settings.Outlaw.KillingSpreeDisplayStyle, not Target:IsSpellInRange(S.KillingSpree), nil) then return "Cast Killing Spree" end
+  end
+
+  -- Use BtE before stealth so it's reset
+  if S.BetweentheEyes:IsCastable() and Target:IsSpellInRange(S.BetweentheEyes) and Settings.Outlaw.UseBtEOutsideOfStealth then
+    if S.Crackshot:IsAvailable() then
+      if CastPooling(S.BetweentheEyes) then return "Cast Between the Eyes" end
+    end
   end
 
   -- actions.cds+=/call_action_list,name=stealth_cds,if=!stealthed.all&(!talent.crackshot|cooldown.between_the_eyes.ready)
@@ -769,10 +752,6 @@ local function APL ()
       -- actions.precombat+=/adrenaline_rush,precombat_seconds=3,if=talent.improved_adrenaline_rush
       if S.AdrenalineRush:IsReady() and S.ImprovedAdrenalineRush:IsAvailable() then
         if Cast(S.AdrenalineRush, Settings.Outlaw.OffGCDasOffGCD.AdrenalineRush) then return "Cast Adrenaline Rush (Opener)" end
-      end
-      -- actions.precombat+=/slice_and_dice,precombat_seconds=1
-      if S.SliceandDice:IsReady() and Player:BuffRemains(S.SliceandDice) < (1 + ComboPoints) * 1.8 then
-        if CastPooling(S.SliceandDice) then return "Cast Slice and Dice (Opener)" end
       end
       if Player:StealthUp(true, false) then
         ShouldReturn = Stealth()
