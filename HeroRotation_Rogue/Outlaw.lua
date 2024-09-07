@@ -546,14 +546,14 @@ local function CDs ()
   end
 
   -- Use BtE before stealth so it's reset
-  if S.BetweentheEyes:IsCastable() and Target:IsSpellInRange(S.BetweentheEyes) and Settings.Outlaw.UseBtEOutsideOfStealth then
+  if S.BetweentheEyes:IsReady() and Target:IsSpellInRange(S.BetweentheEyes) and Settings.Outlaw.UseBtEOutsideOfStealth then
     if S.Crackshot:IsAvailable() then
       if CastPooling(S.BetweentheEyes) then return "Cast Between the Eyes" end
     end
   end
 
-  -- actions.cds+=/call_action_list,name=stealth_cds,if=!stealthed.all&(!talent.crackshot|cooldown.between_the_eyes.ready)
-  if not Player:StealthUp(true, true) and (not S.Crackshot:IsAvailable() or S.BetweentheEyes:IsReady()) then
+  -- actions.cds+=/call_action_list,name=stealth_cds,if=!stealthed.all
+  if not Player:StealthUp(true, true) then
     ShouldReturn = StealthCDs()
     if ShouldReturn then return ShouldReturn end
   end
